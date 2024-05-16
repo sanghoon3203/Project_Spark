@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.projectspark" // 네임스페이스 지정
+    namespace = "com.example.project_spark" // 네임스페이스 지정
     compileSdkVersion(31)
 
     defaultConfig {
-        applicationId = "com.example.projectspark"
+        applicationId = "com.example.project_spark"
         minSdkVersion(21)
         targetSdkVersion(31)
         versionCode = 1

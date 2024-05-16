@@ -1,4 +1,4 @@
-package com.example.projectspark
+package com.example.project_spark
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
