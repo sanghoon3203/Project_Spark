@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.project_spark" // 네임스페이스 지정
+    namespace = "com.example.Project_Spark" // 네임스페이스 지정
     compileSdkVersion(31)
 
     defaultConfig {
-        applicationId = "com.example.project_spark"
+        applicationId = "com.example.Project_Spark"
         minSdkVersion(21)
         targetSdkVersion(31)
         versionCode = 1
@@ -28,7 +28,14 @@ android {
             )
         }
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     buildFeatures {
         viewBinding = true
     }
@@ -48,6 +55,15 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.1.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.google.android.gms:play-services-auth:20.1.0") // 추가된 부분
+    implementation("com.google.android.material:material:1.5.0")
+
+    // Android 테스트 종속성 추가
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    testImplementation("junit:junit:4.13.2")
 
     implementation("com.squareup.picasso:picasso:2.71828")
 }

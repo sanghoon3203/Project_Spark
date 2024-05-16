@@ -14,6 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ProjectSpark"
+rootProject.name = "Project_Spark"
 include(":app")
  

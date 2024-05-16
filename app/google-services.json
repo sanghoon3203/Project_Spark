@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:361983562285:android:0fa5bea71abefdcec2dea4",
+        "mobilesdk_app_id": "1:361983562285:android:0f9593ea1db172c2c2dea4",
         "android_client_info": {
-          "package_name": "com.example.project_spark"
+          "package_name": "com.example.Project_Spark"
         }
       },
       "oauth_client": [
