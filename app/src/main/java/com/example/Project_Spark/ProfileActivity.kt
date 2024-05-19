@@ -50,7 +50,7 @@ class ProfileActivity : AppCompatActivity() {
         val profileRef = storageRef.child("${user.uid}")
         profileRef.downloadUrl.addOnSuccessListener {
             // 프로필 이미지가 존재하면 MainActivity로 이동
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, HomeActivity_meeting::class.java)
             startActivity(intent)
             finish()
         }.addOnFailureListener {
