@@ -4,15 +4,25 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.Project_Spark.databinding.ActivityLoginBinding
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.launch
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
-class LoginActivity : AppCompatActivity() {
+import com.google.firebase.auth.FirebaseAuth
+
+class LoginActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
-    private lateinit var binding: ActivityLoginBinding
 
     companion object {
         private const val TAG = "LoginActivity"
@@ -20,42 +30,87 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
         auth = FirebaseAuth.getInstance()
 
-        // Set up sign-in button
-        binding.signInButton.setOnClickListener {
-            val email = binding.emailEditText.text.toString().trim()
-            val password = binding.passwordEditText.text.toString().trim()
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                signIn(email, password)
-            } else {
-                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+        setContent {
+            ProjectSparkTheme {
+                LoginScreen(auth)
             }
-        }
-
-        // Register button click listener
-        binding.registerButton.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
         }
     }
+}
 
-    private fun signIn(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    Log.d(TAG, "signInWithEmail:success")
-                    val user = auth.currentUser
-                    val intent = Intent(this, ProfileActivity::class.java)
-                    startActivity(intent)
-                    finish()
+@Composable
+fun LoginScreen(auth: FirebaseAuth) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    signIn(auth, email, password, context)
                 } else {
-                    Log.w(TAG, "signInWithEmail:failure", task.exception)
-                    Toast.makeText(baseContext, "Authentication failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Please enter email and password", Toast.LENGTH_SHORT).show()
                 }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Sign In")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                val intent = Intent(context, RegisterActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
+        }
+    }
+}
+
+private fun signIn(auth: FirebaseAuth, email: String, password: String, context: android.content.Context) {
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("LoginActivity", "signInWithEmail:success")
+                val intent = Intent(context, ProfileActivity::class.java)
+                context.startActivity(intent)
+            } else {
+                Log.w("LoginActivity", "signInWithEmail:failure", task.exception)
+                Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
             }
+        }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    ProjectSparkTheme {
+        LoginScreen(auth = FirebaseAuth.getInstance())
     }
 }

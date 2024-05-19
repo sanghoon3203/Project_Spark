@@ -6,8 +6,16 @@ plugins {
 }
 
 android {
+
     namespace = "com.example.Project_Spark" // 네임스페이스 지정
     compileSdkVersion(34)
+
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
 
     defaultConfig {
         applicationId = "com.example.Project_Spark"
@@ -31,6 +39,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+
     }
 
     kotlinOptions {
@@ -41,8 +50,23 @@ android {
     }
 }
 
+
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
+    implementation ("androidx.compose.animation:animation:1.6.7")
+    implementation ("androidx.compose.compiler:compiler:1.5.14")
+    implementation ("androidx.compose.compiler:compiler:1.5.14")
+    implementation ("androidx.compose.ui:ui:1.6.7")
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.compose.runtime:runtime:1.6.7")
+    implementation ("androidx.compose.foundation:foundation:1.6.7")
+    implementation ("androidx.compose.material:material:1.6.7")
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.6.7")
+    implementation ("androidx.activity:activity-compose:1.7.2")
+    testImplementation ("androidx.compose.ui:ui-test-junit4:1.6.7")
+    debugImplementation ("androidx.compose.ui:ui-tooling:1.6.7")
+
+    //--------제트팩컴포즈 종속성입니다-----------//
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("com.google.android.material:material:1.9.0")
@@ -59,21 +83,13 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-
-    // Room dependencies
-    implementation("androidx.room:room-runtime:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-
-    // Retrofit dependencies
+// Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     implementation("com.squareup.picasso:picasso:2.71828")
 
     testImplementation("junit:junit:4.13.2")
-
-
     // Android 테스트 종속성 추가
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")

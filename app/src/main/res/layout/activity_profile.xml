@@ -24,7 +24,7 @@
         android:id="@+id/etName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name" />
+        android:hint="이름" />
 
     <Button
         android:id="@+id/btnSaveProfile"

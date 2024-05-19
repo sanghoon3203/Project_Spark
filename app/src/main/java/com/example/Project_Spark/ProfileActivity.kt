@@ -1,6 +1,5 @@
 package com.example.Project_Spark
 
-
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -29,11 +28,14 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        checkProfileExists()
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         user = FirebaseAuth.getInstance().currentUser!!
-        storageRef = FirebaseStorage.getInstance().reference
+        storageRef = FirebaseStorage.getInstance().reference.child("UserProfile")
+
+
 
         binding.btnChooseImage.setOnClickListener {
             chooseImage()
@@ -41,6 +43,19 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.btnSaveProfile.setOnClickListener {
             uploadImage()
+        }
+    }
+
+    private fun checkProfileExists() {
+        val profileRef = storageRef.child("${user.uid}")
+        profileRef.downloadUrl.addOnSuccessListener {
+            // 프로필 이미지가 존재하면 MainActivity로 이동
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }.addOnFailureListener {
+            // 프로필 이미지가 없으면 ProfileActivity에 머무름
+            Log.d(TAG, "Profile image does not exist, stay in ProfileActivity.")
         }
     }
 
@@ -64,7 +79,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun uploadImage() {
         if (imageUri != null) {
-            val ref = storageRef.child("profiles/${user.uid}")
+            val ref = storageRef.child("${user.uid}")
             ref.putFile(imageUri!!)
                 .addOnSuccessListener {
                     ref.downloadUrl.addOnSuccessListener { uri ->
@@ -90,6 +105,9 @@ class ProfileActivity : AppCompatActivity() {
             .set(profile)
             .addOnSuccessListener {
                 Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Profile Save Failed", e)
