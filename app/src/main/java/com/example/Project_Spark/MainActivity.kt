@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ProjectSparkTheme {
+                ImageViewExample()
                 MainScreen()
             }
         }

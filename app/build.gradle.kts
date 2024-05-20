@@ -64,6 +64,7 @@ dependencies {
     implementation ("androidx.activity:activity-compose:1.7.2")
     testImplementation ("androidx.compose.ui:ui-test-junit4:1.6.7")
     debugImplementation ("androidx.compose.ui:ui-tooling:1.6.7")
+    implementation ("com.google.accompanist:accompanist-coil:0.11.1")
 
     //--------제트팩컴포즈 종속성입니다-----------//
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
@@ -82,6 +83,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.1.0")
     implementation("com.google.android.material:material:1.5.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation ("io.coil-kt:coil-compose:2.0.0")
+
 
 // Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -99,6 +102,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 
     implementation("com.squareup.picasso:picasso:2.71828")
+    implementation ("com.google.accompanist:accompanist-coil:0.11.1") // For loading images with Coil
+
 }
 
 apply(plugin = "com.google.gms.google-services")
