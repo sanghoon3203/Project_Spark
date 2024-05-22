@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import com.example.Project_Spark.ui.components.BottomNavigationBar
 import android.content.Intent
 
 
@@ -70,6 +71,7 @@ fun TopTabs() {
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.bell), // 아이콘 리소스
+
             contentDescription = null
 
 
@@ -199,62 +201,6 @@ fun MeetingCard() {
     }
 }
 
-@Composable
-
-fun BottomNavigationBar() {
-    val context = LocalContext.current
-
-
-    androidx.compose.material3.BottomAppBar(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = Color.White
-    ) {
-        androidx.compose.material3.IconButton(onClick = { /* Do something */ }) {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.home), // 홈 아이콘 리소스
-                contentDescription = null,
-                modifier = Modifier.size(30.dp)
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        androidx.compose.material3.IconButton(onClick = { /* Do something */ }) {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.search), // 검색 아이콘 리소스
-                contentDescription = null,
-                modifier = Modifier.size(30.dp)
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        androidx.compose.material3.IconButton(onClick = { /* Do something */ }) {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.create), // 추가 아이콘 리소스
-                contentDescription = null,
-                modifier = Modifier.size(50.dp)
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        androidx.compose.material3.IconButton(onClick = {
-            // FriendsActivity로 이동
-            val intent = Intent(context, FriendsActivity::class.java)
-            context.startActivity(intent) },
-            modifier = Modifier.size(30.dp)
-        ) {// IconButton 크기 설정 {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.chat), // 채팅 아이콘 리소스
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        androidx.compose.material3.IconButton(onClick = { /* Do something */ }) {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.defaultprofile), // 프로필 아이콘 리소스
-                contentDescription = null,
-                modifier = Modifier.size(40.dp)
-            )
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

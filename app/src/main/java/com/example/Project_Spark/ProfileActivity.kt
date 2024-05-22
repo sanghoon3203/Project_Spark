@@ -1,30 +1,43 @@
 package com.example.Project_Spark
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.example.Project_Spark.databinding.ActivityProfileBinding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.squareup.picasso.Picasso
 
-class ProfileActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityProfileBinding
+const val TAG = "ProfileActivity"
+
+class ProfileActivity : ComponentActivity() {
     private lateinit var storageRef: StorageReference
     private lateinit var user: FirebaseUser
-    private var imageUri: Uri? = null
-
-    companion object {
-        private const val PICK_IMAGE_REQUEST = 71
-        private const val TAG = "ProfileActivity"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,102 +46,207 @@ class ProfileActivity : AppCompatActivity() {
         user = FirebaseAuth.getInstance().currentUser!!
         storageRef = FirebaseStorage.getInstance().reference.child("UserProfile")
 
-        // 프로필 존재 여부를 확인
-        checkProfileExists()
-
-        // View Binding 설정
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // 이미지 선택 버튼 클릭 리스너 설정
-        binding.btnChooseImage.setOnClickListener {
-            chooseImage()
-        }
-
-        // 프로필 저장 버튼 클릭 리스너 설정
-        binding.btnSaveProfile.setOnClickListener {
-            uploadImage()
-        }
-    }
-
-    // 프로필이 존재하는지 확인하는 함수
-    private fun checkProfileExists() {
-        val profileRef = storageRef.child("${user.uid}")
-
-        // 프로필 이미지의 다운로드 URL을 확인
-        profileRef.downloadUrl.addOnSuccessListener {
-            // 프로필 이미지가 존재하면 HomeActivity_meeting로 이동
-            val intent = Intent(this, HomeActivity_meeting::class.java)
-            startActivity(intent)
-            finish()
-        }.addOnFailureListener {
-            // 프로필 이미지가 없으면 ProfileActivity에 머무름
-            Log.d(TAG, "Profile image does not exist, stay in ProfileActivity.")
-        }
-    }
-
-    // 이미지 선택을 시작하는 함수
-    private fun chooseImage() {
-        val intent = Intent()
-        intent.type = "image/*"
-        intent.action = Intent.ACTION_GET_CONTENT
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST)
-    }
-
-    // 이미지 선택 결과를 처리하는 함수
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
-            if (data != null && data.data != null) {
-                imageUri = data.data
-                // 선택한 이미지를 Picasso 라이브러리를 사용하여 ImageView에 표시
-                Picasso.get().load(imageUri).into(binding.imgProfile)
+        // Jetpack Compose를 사용하여 UI 설정
+        setContent {
+            ProjectSparkTheme {
+                ProfileScreen(user, storageRef)
             }
         }
     }
+}
 
-    // 이미지를 업로드하는 함수
-    private fun uploadImage() {
+@Composable
+fun ProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
+    // UI 상태 관리
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var name by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
+    var isIntrovert by remember { mutableStateOf(true) }
+    var major by remember { mutableStateOf("") }
+    var studentId by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+
+    // 이미지 선택 후 결과를 처리하는 런처
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    // 이미지 업로드 및 프로필 저장
+    fun uploadImageAndSaveProfile() {
         if (imageUri != null) {
             val ref = storageRef.child("${user.uid}")
             ref.putFile(imageUri!!)
                 .addOnSuccessListener {
-                    // 업로드 성공 후 다운로드 URL을 가져와 프로필 저장
                     ref.downloadUrl.addOnSuccessListener { uri ->
-                        saveProfile(uri.toString())
+                        saveProfile(user, name, bio, isIntrovert, major, studentId, uri.toString(), context)
                     }
                 }
                 .addOnFailureListener { e ->
-                    // 업로드 실패 시 에러 로그와 토스트 메시지 표시
                     Log.e(TAG, "Image Upload Failed", e)
-                    Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Failed " + e.message, Toast.LENGTH_SHORT).show()
                 }
         }
     }
 
-    // 프로필 정보를 Firestore에 저장하는 함수
-    private fun saveProfile(imageUrl: String) {
-        val profile = hashMapOf(
-            "name" to binding.etName.text.toString(),
-            "email" to user.email,
-            "imageUrl" to imageUrl
+    // 프로필 화면 UI
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // 프로필 이미지 표시
+        if (imageUri != null) {
+            Image(
+                painter = rememberImagePainter(data = imageUri),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(8.dp),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.ic_profile_placeholder),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(8.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 이미지 선택 버튼
+        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+            Text("프로필사진 선택")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 이름 입력 필드
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("이름") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default // 기본 키보드 옵션을 사용하여 한글 입력 가능하게 설정
         )
 
-        val db = FirebaseFirestore.getInstance()
-        db.collection("profiles").document(user.uid)
-            .set(profile)
-            .addOnSuccessListener {
-                // 프로필 저장 성공 시 HomeActivity_meeting로 이동
-                Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, HomeActivity_meeting::class.java)
-                startActivity(intent)
-                finish()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 자기소개 입력 필드
+        OutlinedTextField(
+            value = bio,
+            onValueChange = { bio = it },
+            label = { Text("자기소개") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default // 기본 키보드 옵션을 사용하여 한글 입력 가능하게 설정
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 성격 선택 (내향형/외향형)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("성격: ")
+            RadioButton(
+                selected = isIntrovert,
+                onClick = { isIntrovert = true }
+            )
+            Text("내향형")
+            Spacer(modifier = Modifier.width(8.dp))
+            RadioButton(
+                selected = !isIntrovert,
+                onClick = { isIntrovert = false }
+            )
+            Text("외향형")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 학과 입력 필드
+        OutlinedTextField(
+            value = major,
+            onValueChange = { major = it },
+            label = { Text("학과") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default // 기본 키보드 옵션을 사용하여 한글 입력 가능하게 설정
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 학번 입력 필드
+        OutlinedTextField(
+            value = studentId,
+            onValueChange = { studentId = it },
+            label = { Text("학번") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 프로필 저장 버튼
+        Button(onClick = { uploadImageAndSaveProfile() }) {
+            Text("Save Profile")
+        }
+    }
+}
+
+// 프로필 정보를 Firestore에 저장하는 함수
+fun saveProfile(
+    user: FirebaseUser,
+    name: String,
+    bio: String,
+    isIntrovert: Boolean,
+    major: String,
+    studentId: String,
+    imageUrl: String,
+    context: Context
+) {
+    val profile = hashMapOf(
+        "name" to name,
+        "bio" to bio,
+        "isIntrovert" to isIntrovert,
+        "major" to major,
+        "studentId" to studentId,
+        "email" to user.email,
+        "imageUrl" to imageUrl
+    )
+
+    val db = FirebaseFirestore.getInstance()
+    db.collection("profiles").document(user.uid)
+        .set(profile)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Profile Saved", Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, HomeActivity_meeting::class.java)
+            context.startActivity(intent)
+            if (context is Activity) {
+                context.finish()
             }
-            .addOnFailureListener { e ->
-                // 프로필 저장 실패 시 에러 로그와 토스트 메시지 표시
-                Log.e(TAG, "Profile Save Failed", e)
-                Toast.makeText(this, "Failed to Save Profile", Toast.LENGTH_SHORT).show()
-            }
+        }
+        .addOnFailureListener { e ->
+            Log.e(TAG, "Profile Save Failed", e)
+            Toast.makeText(context, "Failed to Save Profile", Toast.LENGTH_SHORT).show()
+        }
+}
+
+// 프리뷰를 위한 컴포저블 함수
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    ProjectSparkTheme {
+        // Dummy user and storage reference for preview purposes
+        val dummyUser = FirebaseAuth.getInstance().currentUser!! // Dummy user object
+        val dummyStorageRef = FirebaseStorage.getInstance().reference.child("UserProfile") // Dummy storage reference
+        ProfileScreen(dummyUser, dummyStorageRef)
     }
 }

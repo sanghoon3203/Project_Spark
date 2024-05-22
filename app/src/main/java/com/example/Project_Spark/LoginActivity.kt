@@ -56,14 +56,14 @@ fun LoginScreen(auth: FirebaseAuth) {
         TextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text("이메일") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("비밀번호") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -73,12 +73,12 @@ fun LoginScreen(auth: FirebaseAuth) {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
                     signIn(auth, email, password, context)
                 } else {
-                    Toast.makeText(context, "Please enter email and password", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "이메일과 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign In")
+            Text("로그인")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
@@ -88,7 +88,7 @@ fun LoginScreen(auth: FirebaseAuth) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register")
+            Text("회원가입")
         }
     }
 }

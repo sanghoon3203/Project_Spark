@@ -1,9 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Light Theme Colors -->
+    <color name="primary">#80CBC4</color>
+    <color name="onPrimary">#4E342E</color>
+    <color name="primaryContainer">#FFE0B2</color>
+    <color name="onPrimaryContainer">#5D4037</color>
+    <color name="secondaryContainer">#E0E0E0</color>
+    <color name="onSecondaryContainer">#795548</color>
+    <color name="error">#D32F2F</color>
+    <color name="background">#D7CCC8</color>
+    <color name="onBackground">#3E2723</color>
+    <color name="surface">#A1887F</color>
+    <color name="onSurface">#4E342E</color>
+    <color name="surfaceVariant">#F5F5F5</color>
+    <color name="onSurfaceVariant">#5D4037</color>
+    <color name="outline">#8D6E63</color>
+
+    <!-- Dark Theme Colors -->
+    <color name="darkPrimary">#FFA726</color>
+    <color name="darkOnPrimary">#3E2723</color>
+    <color name="darkPrimaryContainer">#FFE0B2</color>
+    <color name="darkOnPrimaryContainer">#4E342E</color>
+    <color name="darkSecondaryContainer">#3E2723</color>
+    <color name="darkOnSecondaryContainer">#E0E0E0</color>
+    <color name="darkError">#EF9A9A</color>
+    <color name="darkBackground">#212121</color>
+    <color name="darkOnBackground">#FFFFFF</color>
+    <color name="darkSurface">#37474F</color>
+    <color name="darkOnSurface">#E0E0E0</color>
+    <color name="darkSurfaceVariant">#8D6E63</color>
+    <color name="darkOnSurfaceVariant">#FFCCBC</color>
+    <color name="darkOutline">#5D4037</color>
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
     <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
-    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 </resources>
