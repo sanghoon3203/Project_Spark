@@ -14,12 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.sendbird.android.SendbirdChat
 import com.sendbird.android.exception.SendbirdException
 import com.sendbird.android.handler.InitResultHandler
 import com.sendbird.uikit.SendbirdUIKit
@@ -107,7 +106,7 @@ private fun signIn(auth: FirebaseAuth, email: String, password: String, db: Fire
                 Log.d("LoginActivity", "signInWithEmail:success")
                 val uid = auth.currentUser?.uid
                 if (uid != null) {
-                    // Sendbird 초기화
+                    // Sendbird 초기화 및 연결
                     initializeSendbird(uid, db, context)
                 }
             } else {
@@ -120,7 +119,7 @@ private fun signIn(auth: FirebaseAuth, email: String, password: String, db: Fire
 private fun initializeSendbird(userId: String, db: FirebaseFirestore, context: android.content.Context) {
     SendbirdUIKit.init(object : SendbirdUIKitAdapter {
         override fun getAppId(): String {
-            return "YOUR_APP_ID" // Specify your Sendbird application ID.
+            return "1EB57A17-6FCF-4781-9828-BC027F97C8EA" // Specify your Sendbird application ID.
         }
 
         override fun getAccessToken(): String {
@@ -151,15 +150,29 @@ private fun initializeSendbird(userId: String, db: FirebaseFirestore, context: a
 
                 override fun onInitFailed(e: SendbirdException) {
                     // If DB migration fails, this method is called.
+                    Log.e("Sendbird", "Initialization failed: ${e.message}")
+                    Toast.makeText(context, "Sendbird 초기화 실패.", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onInitSucceed() {
                     // If DB migration is successful, this method is called and you can proceed to the next step.
-                    checkUserProfile(userId, db, context)
+                    connectToSendbird(userId, db, context)
                 }
             }
         }
     }, context)
+}
+
+private fun connectToSendbird(userId: String, db: FirebaseFirestore, context: android.content.Context) {
+    SendbirdChat.connect(userId) { user, e ->
+        if (user == null || e != null) {
+            e?.printStackTrace()
+            Toast.makeText(context, "Sendbird 연결 실패", Toast.LENGTH_SHORT).show()
+            return@connect
+        }
+        // 연결이 성공하면 사용자 프로필 확인
+        checkUserProfile(userId, db, context)
+    }
 }
 
 private fun checkUserProfile(uid: String, db: FirebaseFirestore, context: android.content.Context) {

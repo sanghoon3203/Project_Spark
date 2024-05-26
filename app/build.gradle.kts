@@ -114,7 +114,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.1.0")
 
     // Sendbird SDK
-    implementation ("com.sendbird.sdk:sendbird-chat:4.16.3")
     //sendbird Api
     implementation("com.sendbird.sdk:uikit:3.1.0")
 }
