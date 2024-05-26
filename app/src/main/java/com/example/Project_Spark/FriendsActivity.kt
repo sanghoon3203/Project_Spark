@@ -9,6 +9,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +35,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
 
@@ -59,7 +63,6 @@ class FriendsActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun FriendsScreen(userId: String, viewModel: FriendsViewModel = viewModel()) {
     val friendsList by viewModel.friendsList.collectAsState() // 친구 목록 상태 수집
@@ -75,10 +78,88 @@ fun FriendsScreen(userId: String, viewModel: FriendsViewModel = viewModel()) {
     Column(modifier = Modifier.fillMaxSize()) {
         // 헤더
         Header()
+        // 친구 추가 버튼
+        AddFriendButton(userId, viewModel)
         // 친구 목록
-        FriendList(friendsList, userId, viewModel)
+        FriendList(friendsList, userId, viewModel, Modifier.weight(1f))
         // 바텀 네비게이션 바
         BottomNavigationBar()
+    }
+}
+
+@Composable
+fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsViewModel, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color.LightGray)
+    ) {
+        item {
+            Divider(
+                color = Color.Black,
+                thickness = 1.dp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                "스친 ",
+                fontSize = 12.sp,
+                lineHeight = 21.sp,
+                fontFamily = FontFamily(Font(R.font.inter)),
+                fontWeight = FontWeight.Normal,
+                color = Color.Black,
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // 친구 목록을 반복하여 각 친구 항목을 표시
+        items(friendsList) { friends ->
+            FriendItem(friend = friends, onDelete = {
+                viewModel.deleteFriend(userId, friends.id)
+            })
+            Divider(
+                color = Color.LightGray,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
+    var newFriendEmail by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TextField(
+            value = newFriendEmail,
+            onValueChange = { newFriendEmail = it },
+            label = { Text("친구 이메일 입력") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = {
+            viewModel.addFriendByEmail(userId, newFriendEmail) { success ->
+                if (success) {
+                    Toast.makeText(context, "친구 요청을 보냈습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "친구 요청을 보내는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }) {
+            Text("친구 추가")
+        }
     }
 }
 
@@ -134,11 +215,11 @@ fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsView
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            "친구 목록",
-            fontSize = 24.sp,
+            "스친 ",
+            fontSize = 12.sp,
             lineHeight = 21.sp,
             fontFamily = FontFamily(Font(R.font.inter)),
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             color = Color.Black,
             textAlign = TextAlign.Left,
             modifier = Modifier
@@ -148,19 +229,20 @@ fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsView
         Spacer(modifier = Modifier.height(8.dp))
 
         // 친구 목록을 반복하여 각 친구 항목을 표시
-        for (friend in friendsList) {
-            FriendItem(friend = friend, onDelete = {
-                viewModel.deleteFriend(userId, friend.id)
-            })
-            Divider(
-                color = Color.LightGray,
-                thickness = 1.dp,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-            )
+        LazyColumn {
+            items(friendsList) { friend ->
+                FriendItem(friend = friend, onDelete = {
+                    viewModel.deleteFriend(userId, friend.id)
+                })
+                Divider(
+                    color = Color.LightGray,
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                )
+            }
         }
     }
 }
-
 @Composable
 fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     Row(
