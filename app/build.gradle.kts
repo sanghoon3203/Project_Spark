@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.7")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.animation:animation:1.6.7")
+
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
     testImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
 
@@ -70,6 +71,8 @@ dependencies {
 
     // AndroidX and other dependencies
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
+    implementation ("androidx.fragment:fragment-ktx:1.3.0")
+
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("com.google.android.material:material:1.9.0")
@@ -109,6 +112,11 @@ dependencies {
 
     // Google services plugin
     implementation("com.google.android.gms:play-services-auth:20.1.0")
+
+    // Sendbird SDK
+    implementation ("com.sendbird.sdk:sendbird-chat:4.16.3")
+    //sendbird Api
+    implementation("com.sendbird.sdk:uikit:3.1.0")
 }
 
 apply(plugin = "com.google.gms.google-services")
