@@ -24,6 +24,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url=uri ("https://repo.sendbird.com/public/maven") } // Add this line
+
     }
 }
 tasks.register("clean", Delete::class) {
