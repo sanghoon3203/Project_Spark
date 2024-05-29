@@ -21,13 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.spark.ui.theme.SparkTheme
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 
-class MainActivity : ComponentActivity() {
+class BlockActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SparkTheme {
+            ProjectSparkTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -61,10 +61,10 @@ fun UserBlockScreen() {
             color = Color.Red
         )
         Text(
-                text = "하시겠습니까?",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.Black
+            text = "하시겠습니까?",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -89,7 +89,7 @@ fun UserBlockScreen() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    SparkTheme {
+    ProjectSparkTheme {
         UserBlockScreen()
     }
 }

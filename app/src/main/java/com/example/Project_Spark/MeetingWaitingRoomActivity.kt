@@ -20,15 +20,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.spark.ui.theme.SparkTheme
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 
 data class Profile(val department: String, val age: String)
 
-class MainActivity : ComponentActivity() {
+class MeetingWaitingRoomActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SparkTheme {
+            ProjectSparkTheme {
                 MeetingWaitingRoomScreen()
             }
         }
@@ -195,7 +195,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun MeetingWaitingRoomScreenPreview() {
-    SparkTheme {
+    ProjectSparkTheme {
         MeetingWaitingRoomScreen()
     }
 }
