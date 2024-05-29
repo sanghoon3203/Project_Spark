@@ -281,7 +281,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         Spacer(modifier = Modifier.width(8.dp))
         // 차단 아이콘
         Image(
-            painter = painterResource(id = R.drawable.block),
+            painter = painterResource(id = R.drawable.close_ring),
             contentDescription = "Block",
             contentScale = ContentScale.None,
             modifier = Modifier.size(50.dp)
