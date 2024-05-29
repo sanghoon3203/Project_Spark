@@ -1,7 +1,6 @@
 package com.example.Project_Spark
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -63,6 +62,7 @@ class FriendsActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun FriendsScreen(userId: String, viewModel: FriendsViewModel = viewModel()) {
     val friendsList by viewModel.friendsList.collectAsState() // 친구 목록 상태 수집
@@ -183,7 +183,7 @@ fun Header() {
         horizontalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.chevron_left),
+            painter = painterResource(id = R.drawable.expand_left),
             contentDescription = "Back",
             contentScale = ContentScale.None,
             modifier = Modifier.size(50.dp)
@@ -202,48 +202,6 @@ fun Header() {
 }
 
 @Composable
-fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(700.dp)
-            .background(Color.LightGray)
-    ) {
-        Divider(
-            color = Color.Black,
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            "스친 ",
-            fontSize = 12.sp,
-            lineHeight = 21.sp,
-            fontFamily = FontFamily(Font(R.font.inter)),
-            fontWeight = FontWeight.Normal,
-            color = Color.Black,
-            textAlign = TextAlign.Left,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 친구 목록을 반복하여 각 친구 항목을 표시
-        LazyColumn {
-            items(friendsList) { friend ->
-                FriendItem(friend = friend, onDelete = {
-                    viewModel.deleteFriend(userId, friend.id)
-                })
-                Divider(
-                    color = Color.LightGray,
-                    thickness = 1.dp,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                )
-            }
-        }
-    }
-}
-@Composable
 fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     Row(
         modifier = Modifier
@@ -254,7 +212,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     ) {
         // 프로필 이미지 표시
         Image(
-            painter = rememberImagePainter(data = friend.profileImageUrl ?: R.drawable.defaultprofile),
+            painter = rememberImagePainter(data = friend.profileImageUrl ?: R.drawable.user_cicrle),
             contentDescription = "Profile Image",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.size(56.dp)
@@ -281,7 +239,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         Spacer(modifier = Modifier.width(8.dp))
         // 차단 아이콘
         Image(
-            painter = painterResource(id = R.drawable.block),
+            painter = painterResource(id = R.drawable.close_ring),
             contentDescription = "Block",
             contentScale = ContentScale.None,
             modifier = Modifier.size(50.dp)
@@ -294,11 +252,15 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     }
 }
 
+
+
 // FriendsScreen 미리보기용 프리뷰 함수
 @Preview(showBackground = true)
 @Composable
 fun FriendsScreenPreview() {
     ProjectSparkTheme {
-        FriendsScreen("dummy_user_id")
+        FriendsScreen("Fh6dHI8xCQZXdKqw9G4WRjSADeX2")
     }
 }
+
+

@@ -26,6 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".HomeActivity_friendsmatching"></activity>
 
         <activity android:name=".CreateChannelActivity"></activity>
         <activity android:name=".ChatListActivity"></activity>

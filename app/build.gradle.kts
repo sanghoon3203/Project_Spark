@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.7")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.animation:animation:1.6.7")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
     testImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
@@ -68,6 +69,9 @@ dependencies {
 
     // Coil for image loading in Compose
     implementation("io.coil-kt:coil-compose:2.0.0")
+    implementation ("io.coil-kt:coil:2.0.0")
+    implementation ("io.coil-kt:coil-svg:2.1.0")
+
 
     // AndroidX and other dependencies
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
@@ -95,6 +99,10 @@ dependencies {
 
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1")
+
+
 
     // Retrofit dependencies
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
