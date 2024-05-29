@@ -8,13 +8,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,9 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
 import com.example.Project_Spark.model.Friend
-import com.example.Project_Spark.ui.components.BottomNavigationBar
-import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import com.example.Project_Spark.model.Team
 import com.example.Project_Spark.viewmodel.FriendsViewModel
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import java.util.*
 
 class HomeActivity_meeting : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,69 +102,11 @@ fun ActionButtons(onMeetingClick: () -> Unit, onFindFriendsClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray)
+            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
         ) {
             Text("얼른 새로운 친구 만나기", color = Color.Black, fontSize = 24.sp)
         }
     }
-}
-
-@Composable
-fun FriendSelectionDialog(
-    friendsList: List<Friend>,
-    onDismiss: () -> Unit,
-    onConfirm: (List<Friend>) -> Unit
-) {
-    var selectedFriends by remember { mutableStateOf(emptyList<Friend>()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("친구 선택") },
-        text = {
-            LazyColumn {
-                items(friendsList) { friend ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedFriends = if (selectedFriends.contains(friend)) {
-                                    selectedFriends - friend
-                                } else {
-                                    selectedFriends + friend
-                                }
-                            }
-                            .padding(8.dp)
-                            .background(if (selectedFriends.contains(friend)) Color.LightGray else Color.Transparent)
-                    ) {
-                        Image(
-                            painter = rememberImagePainter(data = friend.profileImageUrl ?: R.drawable.defaultprofile),
-                            contentDescription = "Profile Image",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier.size(56.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            friend.name,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.Black,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onConfirm(selectedFriends) }) {
-                Text("확인")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("취소")
-            }
-        }
-    )
 }
 
 @Composable
