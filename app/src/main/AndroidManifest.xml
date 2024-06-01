@@ -8,6 +8,7 @@
 
 
     <application
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,6 +28,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeActivity_friendsmatching"></activity>
+        <activity android:name=".MeetingReservationActivity"></activity>
+        <activity android:name=".TeamCreationActivity"></activity>
+        <activity android:name=".TeamDeleteActivity"></activity>
 
         <activity android:name=".CreateChannelActivity"></activity>
         <activity android:name=".ChatListActivity"></activity>

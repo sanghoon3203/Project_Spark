@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.Project_Spark.FriendsActivity
 import com.example.Project_Spark.R
 import com.example.Project_Spark.ChatListActivity
+import com.example.Project_Spark.HomeActivity_meeting
 
 @Composable
 fun BottomNavigationBar() {
@@ -26,7 +27,9 @@ fun BottomNavigationBar() {
         modifier = Modifier.fillMaxWidth(),
         containerColor = Color.White
     ) {
-        IconButton(onClick = { /* Do something */ }) {
+        IconButton(onClick = {
+            val intent = Intent(context, HomeActivity_meeting::class.java)
+            context.startActivity(intent) }) {
             Icon(
                 painter = painterResource(id = R.drawable.home), // 홈 아이콘 리소스
                 contentDescription = null,

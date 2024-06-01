@@ -241,30 +241,36 @@ fun Banner() {
 @Composable
 fun MeetingInfo() {}
 
-    @Composable
-    fun MeetingMK() {
-        Row(
+@Composable
+fun MeetingMK() {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp) // 전체 Row의 패딩을 추가합니다
+    ) {
+        xmlImage(
+            drawableResId = R.drawable.meetingbutton,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp) // 전체 Row의 패딩을 추가합니다
-        ) {
-            xmlImage(
-                drawableResId = R.drawable.meetingbutton,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp)
-            )
-            xmlImage(
-                drawableResId = R.drawable.teambutton,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp)
-            )
-        }
+                .weight(1f)
+                .padding(8.dp)
+                .clickable {
+                    val intent = Intent(context, MeetingReservationActivity::class.java)
+                    context.startActivity(intent)
+                }
+        )
+        xmlImage(
+            drawableResId = R.drawable.teambutton,
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp)
+                .clickable {
+                    val intent = Intent(context, TeamCreationActivity::class.java)
+                    context.startActivity(intent)
+                }
+        )
     }
-
-
-
+}
 
 @Composable
 fun MeetingCard() {

@@ -6,7 +6,9 @@ import com.sendbird.android.handler.InitResultHandler
 import com.sendbird.uikit.SendbirdUIKit
 import com.sendbird.uikit.adapter.SendbirdUIKitAdapter
 import com.sendbird.uikit.interfaces.UserInfo
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class BaseApplication : Application() {
     override fun onCreate() {
         super.onCreate()
