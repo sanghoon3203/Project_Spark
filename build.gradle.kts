@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.9.24" apply false
     // Add the dependency for the Google services Gradle plugin
     id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.google.dagger.hilt.android") version "2.44" apply false
+
 }
 // build.gradle (Project level)
 buildscript {
@@ -29,3 +31,4 @@ allprojects {
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
+

@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("dagger.hilt.android.plugin") // Hilt 플러그인 추가
 }
 
 android {
@@ -59,12 +60,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.7")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.animation:animation:1.6.7")
-<<<<<<< Updated upstream
-=======
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
->>>>>>> Stashed changes
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
     testImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
 
@@ -115,6 +113,15 @@ dependencies {
 
     // Google services plugin
     implementation("com.google.android.gms:play-services-auth:20.1.0")
+
+    // javax.inject
+    implementation("javax.inject:javax.inject:1")
+
+    // Dagger Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-compiler:2.44")
+    // Hilt Navigation Compose
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
 
 apply(plugin = "com.google.gms.google-services")
