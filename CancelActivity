@@ -47,7 +47,7 @@ fun ExitScreen() {
                     onClick = {
                         showDialog = false
                         showToast = true
-                        // 탈퇴 기능을 여기에 추가하세요
+                        // 탈퇴 기능을 여기에 추가헤주세요
                     }
                 ) {
                     Text("예")
