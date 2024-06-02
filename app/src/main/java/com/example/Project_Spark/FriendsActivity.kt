@@ -145,14 +145,15 @@ fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
-            viewModel.addFriendByEmail(userId, newFriendEmail) { success ->
+            viewModel.addFriendByEmail(userId, newFriendEmail,) { success ->
                 if (success) {
                     Toast.makeText(context, "친구 요청을 보냈습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "친구 요청을 보내는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
-        }) {
+        },                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
+        ) {
             Text("친구 추가",fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
         }
     }
@@ -207,7 +208,8 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         // 삭제 버튼
-        Button(onClick = onDelete) {
+        Button(onClick = onDelete,                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
+        ) {
             Text("Delete")
         }
     }

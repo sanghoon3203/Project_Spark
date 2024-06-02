@@ -143,7 +143,10 @@ fun TeamCreateScreen(navController: NavController, viewModel: TeamCreateViewMode
                 onClick = {
                     viewModel.createTeam(teamName.value, department.value, teamDescription.value, teamMembers)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
+
+
             ) {
                 Text(text = "팀 생성", fontFamily = fontFamily)
             }
@@ -179,7 +182,8 @@ fun TeamCreateTopBar(navController: NavController) {
         },
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White),
+            ,
+        backgroundColor = Color(0xFF7DD8C6),
         actions = {},
         elevation = 8.dp
     )
