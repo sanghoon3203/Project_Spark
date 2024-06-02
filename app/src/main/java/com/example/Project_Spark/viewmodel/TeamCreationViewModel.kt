@@ -1,8 +1,10 @@
-package com.example.Project_Spark
+package com.example.Project_Spark.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.Project_Spark.Team
 import com.example.Project_Spark.model.Friend
+import com.example.Project_Spark.repository.FirebaseRepository
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel

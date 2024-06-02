@@ -1,6 +1,5 @@
 package com.example.Project_Spark
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -26,18 +25,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.Project_Spark.model.Friend
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 import com.example.Project_Spark.viewmodel.FriendsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.Project_Spark.ui.components.BottomNavigationBar
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.launch
 
 class FriendsActivity : ComponentActivity() {
 
@@ -77,7 +72,7 @@ fun FriendsScreen(userId: String, viewModel: FriendsViewModel = viewModel()) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         // 헤더
-        Header()
+        TopBar(navController = rememberNavController())
         // 친구 추가 버튼
         AddFriendButton(userId, viewModel)
         // 친구 목록
@@ -104,7 +99,7 @@ fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsView
                 "스친 ",
                 fontSize = 12.sp,
                 lineHeight = 21.sp,
-                fontFamily = FontFamily(Font(R.font.inter)),
+                fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
                 fontWeight = FontWeight.Normal,
                 color = Color.Black,
                 textAlign = TextAlign.Left,
@@ -145,7 +140,7 @@ fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
         TextField(
             value = newFriendEmail,
             onValueChange = { newFriendEmail = it },
-            label = { Text("친구 이메일 입력") },
+            label = { Text("친구 이메일 입력",fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -158,48 +153,14 @@ fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
                 }
             }
         }) {
-            Text("친구 추가")
+            Text("친구 추가",fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
         }
     }
 }
 
-@Composable
-fun BottomNavIconButton(iconResId: Int, onClick: () -> Unit) {
-    androidx.compose.material3.IconButton(onClick = onClick) {
-        androidx.compose.material3.Icon(
-            painter = painterResource(id = iconResId),
-            contentDescription = null,
-            modifier = Modifier.size(30.dp)
-        )
-    }
-}
 
-@Composable
-fun Header() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.expand_left),
-            contentDescription = "Back",
-            contentScale = ContentScale.None,
-            modifier = Modifier.size(50.dp)
-        )
 
-        Text(
-            "친구 목록",
-            fontSize = 24.sp,
-            lineHeight = 45.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
+
 
 @Composable
 fun FriendItem(friend: Friend, onDelete: () -> Unit) {
@@ -212,7 +173,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     ) {
         // 프로필 이미지 표시
         Image(
-            painter = rememberImagePainter(data = friend.profileImageUrl ?: R.drawable.user_cicrle),
+            painter = rememberImagePainter(data = friend.profileImageUrl ?: R.drawable.user_circle),
             contentDescription = "Profile Image",
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.size(56.dp)
@@ -223,7 +184,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
             friend.name,
             fontSize = 20.sp,
             lineHeight = 21.sp,
-            fontFamily = FontFamily(Font(R.font.inter)),
+            fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
             fontWeight = FontWeight.Normal,
             color = Color.Black,
             modifier = Modifier.weight(1f)
@@ -262,5 +223,21 @@ fun FriendsScreenPreview() {
         FriendsScreen("Fh6dHI8xCQZXdKqw9G4WRjSADeX2")
     }
 }
-
+@Composable
+fun TopBar(navController: NavController) {
+    val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
+    TopAppBar(
+        title = { Text("친구목록", fontFamily = fontFamily) },
+        navigationIcon = {
+            IconButton(onClick = { navController.navigate("home_meeting") }) {
+                Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White),
+        actions = {},
+        elevation = 8.dp
+    )
+}
 

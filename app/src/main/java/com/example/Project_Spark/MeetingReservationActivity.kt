@@ -53,62 +53,85 @@ fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateVi
     val meetingDate = remember { mutableStateOf(LocalDate.now()) }
     val teams = viewModel.teams.collectAsState().value
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(Color.White)
     ) {
-        item {
-            MeetingCreateTopBar(navController = navController)
+        // LazyColumn을 중앙에 배치하여 내용이 스크롤 가능하게 함
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 56.dp, bottom = 56.dp) // TopAppBar와 BottomNavigationBar 높이만큼 패딩
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "팀 선택", style = MaterialTheme.typography.h6)
+            }
 
-            Text(text = "팀 선택", style = MaterialTheme.typography.h6)
-        }
+            items(teams) { team ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = selectedTeam.value == team.id,
+                        onClick = { selectedTeam.value = team.id }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = team.name)
+                }
+            }
 
-        items(teams) { team ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = selectedTeam.value == team.id,
-                    onClick = { selectedTeam.value = team.id }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "예약 날짜", style = MaterialTheme.typography.h6)
+                DatePicker(
+                    selectedDate = meetingDate.value,
+                    onDateChange = { meetingDate.value = it }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = team.name)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.createMeeting(selectedTeam.value, meetingDate.value)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "미팅 생성")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
+        // TopAppBar를 상단에 고정
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+        ) {
+            MeetingCreateTopBar(navController = navController)
+        }
 
-            Text(text = "예약 날짜", style = MaterialTheme.typography.h6)
-            DatePicker(
-                selectedDate = meetingDate.value,
-                onDateChange = { meetingDate.value = it }
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    viewModel.createMeeting(selectedTeam.value, meetingDate.value)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "미팅 생성")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+        // BottomNavigationBar를 하단에 고정
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
             BottomNavigationBar()
         }
     }
 }
 
+
 @Composable
-fun MeetingCreateTopBar(navController: NavController) {
+fun MeetingCreateTopBar(navController: NavController, modifier: Modifier = Modifier) {
     TopAppBar(
         title = { Text("미팅 생성") },
         navigationIcon = {
@@ -116,15 +139,13 @@ fun MeetingCreateTopBar(navController: NavController) {
                 Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(Color.White),
         actions = {},
         elevation = 8.dp
     )
 }
-
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -143,3 +164,4 @@ fun DatePicker(selectedDate: LocalDate, onDateChange: (LocalDate) -> Unit) {
         Text(text = selectedDate.toString())
     }
 }
+

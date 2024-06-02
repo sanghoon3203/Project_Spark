@@ -3,11 +3,10 @@ package com.example.Project_Spark
 import java.util.UUID
 
 data class User(
+    val uid: String = "",
+    val email: String = "",
     val friends: List<String> = emptyList()
 )
-
-
-
 data class Team(
     val id: String = UUID.randomUUID().toString(),
     val name: String = "",

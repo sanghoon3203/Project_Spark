@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -51,6 +53,8 @@ fun LoginScreen(auth: FirebaseAuth, db: FirebaseFirestore) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
+
 
     Column(
         modifier = Modifier
@@ -62,14 +66,14 @@ fun LoginScreen(auth: FirebaseAuth, db: FirebaseFirestore) {
         TextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("이메일") },
+            label = { Text("이메일",fontFamily=fontFamily) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("비밀번호") },
+            label = { Text("비밀번호",fontFamily=fontFamily) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -84,7 +88,7 @@ fun LoginScreen(auth: FirebaseAuth, db: FirebaseFirestore) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("로그인")
+            Text("로그인",fontFamily=fontFamily)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
@@ -94,7 +98,7 @@ fun LoginScreen(auth: FirebaseAuth, db: FirebaseFirestore) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("회원가입")
+            Text("회원가입",fontFamily=fontFamily)
         }
     }
 }

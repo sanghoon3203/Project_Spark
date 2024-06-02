@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -224,7 +226,7 @@ fun RegisterScreen(onRegister: (String, String) -> Unit) {
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("이메일") },
+                label = { Text("이메일",fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -234,7 +236,7 @@ fun RegisterScreen(onRegister: (String, String) -> Unit) {
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("비밀번호") },
+                label = { Text("비밀번호",fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,

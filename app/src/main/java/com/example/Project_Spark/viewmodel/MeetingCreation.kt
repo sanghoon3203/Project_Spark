@@ -2,9 +2,9 @@ package com.example.meetingapp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.Project_Spark.FirebaseRepository
 import com.example.Project_Spark.Meeting
 import com.example.Project_Spark.Team
+import com.example.Project_Spark.repository.FirebaseRepository
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel

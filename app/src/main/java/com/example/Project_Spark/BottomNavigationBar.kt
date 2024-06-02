@@ -70,7 +70,7 @@ fun BottomNavigationBar() {
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { /* Do something */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.user_cicrle), // 프로필 아이콘 리소스
+                painter = painterResource(id = R.drawable.user_circle), // 프로필 아이콘 리소스
                 contentDescription = null,
                 modifier = Modifier.size(30.dp) // Icon 크기 설정
             )

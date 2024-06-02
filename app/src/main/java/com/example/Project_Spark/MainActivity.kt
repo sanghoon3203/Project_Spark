@@ -17,6 +17,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 
 class MainActivity : ComponentActivity() {
@@ -51,6 +53,8 @@ fun ImageViewExample() {
 
 @Composable
 fun MainScreen() {
+    val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
+
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -72,7 +76,8 @@ fun MainScreen() {
             Text(
                 text = "이메일로 로그인하기" ,
                 style = androidx.compose.ui.text.TextStyle(
-                fontSize =24.sp ))// 텍스트 크기를 24sp로 설정)
+                fontSize =24.sp ),
+                fontFamily=fontFamily)// 텍스트 크기를 24sp로 설정)
         }
     }
 }
