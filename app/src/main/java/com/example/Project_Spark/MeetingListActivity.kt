@@ -1,8 +1,10 @@
 package com.example.Project_Spark
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -26,9 +28,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 import java.util.Calendar
+import java.util.UUID
 
 @AndroidEntryPoint
 class MeetingListActivity : ComponentActivity() {
@@ -50,6 +54,9 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
     val meetingDate = remember { mutableStateOf(LocalDate.now()) }
     val reservations = viewModel.getReservationsForDate(meetingDate.value)
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
+    val context = LocalContext.current
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+    var selectedTeam by remember { mutableStateOf<MeetingReservation?>(null) }
 
     Box(
         modifier = Modifier
@@ -87,10 +94,43 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
                             Text(text = "팀 이름: ${reservation.teamName}", fontFamily = fontFamily, fontSize = 16.sp)
                             Text(text = "날짜: ${reservation.date}", fontFamily = fontFamily, fontSize = 16.sp)
                             Text(text = "멤버: ${reservation.members.joinToString(", ")}", fontFamily = fontFamily, fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = {
+                                    selectedTeam = reservation
+                                    showConfirmationDialog = true
+                                }
+                            ) {
+                                Text("매칭")
+                            }
                         }
                     }
                 }
             }
+        }
+
+        if (showConfirmationDialog) {
+            AlertDialog(
+                onDismissRequest = { showConfirmationDialog = false },
+                title = { Text(text = "매칭하시겠습니까?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            selectedTeam?.let {
+                                confirmMatching(it, meetingDate.value, context)
+                            }
+                            showConfirmationDialog = false
+                        }
+                    ) {
+                        Text("확정")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showConfirmationDialog = false }) {
+                        Text("취소")
+                    }
+                }
+            )
         }
 
         // BottomNavigationBar를 하단에 고정
@@ -102,6 +142,29 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
             BottomNavigationBar()
         }
     }
+}
+
+fun confirmMatching(reservation: MeetingReservation, date: LocalDate, context: android.content.Context) {
+    val db = FirebaseFirestore.getInstance()
+    val matchingId = UUID.randomUUID().toString()
+    val matchingData = mapOf(
+        "teamName" to reservation.teamName,
+        "date" to date.toString(),
+        "members" to reservation.members,
+        "matchingId" to matchingId
+    )
+
+    db.collection("MeetingConfirmation")
+        .document(date.toString())
+        .collection("Matchings")
+        .document(matchingId)
+        .set(matchingData)
+        .addOnSuccessListener {
+            Toast.makeText(context, "매칭이 확정되었습니다.", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener {
+            Toast.makeText(context, "매칭 확정에 실패했습니다.", Toast.LENGTH_SHORT).show()
+        }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
