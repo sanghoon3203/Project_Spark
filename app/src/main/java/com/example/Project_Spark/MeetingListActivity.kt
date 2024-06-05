@@ -154,7 +154,7 @@ fun confirmMatching(reservation: MeetingReservation, date: LocalDate, context: a
         "matchingId" to matchingId
     )
 
-    db.collection("MeetingConfirmation")
+    db.collection("meeting_fixing")
         .document(date.toString())
         .collection("Matchings")
         .document(matchingId)
@@ -184,3 +184,4 @@ fun MeetingListDatePicker(selectedDate: LocalDate, onDateChange: (LocalDate) -> 
         Text(text = selectedDate.toString())
     }
 }
+
