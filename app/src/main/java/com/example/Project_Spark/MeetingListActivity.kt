@@ -1,7 +1,5 @@
 package com.example.Project_Spark
 
-import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -18,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -28,11 +25,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
-import java.util.Calendar
-import java.util.UUID
 
 @AndroidEntryPoint
 class MeetingListActivity : ComponentActivity() {
@@ -70,7 +64,7 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
         ) {
             Text(text = "예약 날짜", style = MaterialTheme.typography.h6, fontFamily = fontFamily)
 
-            MeetingListDatePicker(
+            DatePicker(
                 selectedDate = meetingDate.value,
                 onDateChange = { meetingDate.value = it }
             )
@@ -117,7 +111,7 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
                     Button(
                         onClick = {
                             selectedTeam?.let {
-                                confirmMatching(it, meetingDate.value, context)
+                                viewModel.confirmMatching(it, meetingDate.value, context)
                             }
                             showConfirmationDialog = false
                         }
@@ -133,7 +127,6 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
             )
         }
 
-        // BottomNavigationBar를 하단에 고정
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -143,45 +136,3 @@ fun MeetingListScreen(navController: NavController, viewModel: MeetingListViewMo
         }
     }
 }
-
-fun confirmMatching(reservation: MeetingReservation, date: LocalDate, context: android.content.Context) {
-    val db = FirebaseFirestore.getInstance()
-    val matchingId = UUID.randomUUID().toString()
-    val matchingData = mapOf(
-        "teamName" to reservation.teamName,
-        "date" to date.toString(),
-        "members" to reservation.members,
-        "matchingId" to matchingId
-    )
-
-    db.collection("meeting_fixing")
-        .document(date.toString())
-        .collection("Matchings")
-        .document(matchingId)
-        .set(matchingData)
-        .addOnSuccessListener {
-            Toast.makeText(context, "매칭이 확정되었습니다.", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener {
-            Toast.makeText(context, "매칭 확정에 실패했습니다.", Toast.LENGTH_SHORT).show()
-        }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun MeetingListDatePicker(selectedDate: LocalDate, onDateChange: (LocalDate) -> Unit) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    val datePickerDialog = DatePickerDialog(context, { _, selectedYear, selectedMonth, selectedDay ->
-        onDateChange(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
-    }, year, month, day)
-
-    Button(onClick = { datePickerDialog.show() }) {
-        Text(text = selectedDate.toString())
-    }
-}
-

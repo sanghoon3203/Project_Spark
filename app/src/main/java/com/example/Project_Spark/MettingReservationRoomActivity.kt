@@ -10,11 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +32,14 @@ import java.time.LocalDate
 import java.util.Calendar
 
 @AndroidEntryPoint
-class MeetingReservationActivity : ComponentActivity() {
+class MeetingRoomReservationActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ProjectSparkTheme {
                 val navController = rememberNavController()
-                MeetingCreateScreen(navController)
+                MeetingCreationScreen(navController)
             }
         }
     }
@@ -51,28 +47,25 @@ class MeetingReservationActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateViewModel = hiltViewModel()) {
+fun MeetingCreationScreen(navController: NavController, viewModel: MeetingCreateViewModel = hiltViewModel()) {
     val selectedTeam = remember { mutableStateOf<String?>(null) }
     val meetingDate = remember { mutableStateOf(LocalDate.now()) }
-    val teams = viewModel.teams.collectAsState().value
+    val teams by viewModel.teams.collectAsState()
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
-
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // LazyColumn을 중앙에 배치하여 내용이 스크롤 가능하게 함
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 56.dp, bottom = 56.dp) // TopAppBar와 BottomNavigationBar 높이만큼 패딩
+                .padding(top = 56.dp, bottom = 56.dp)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text(text = "팀 선택", style = MaterialTheme.typography.h6,fontFamily=fontFamily)
+                Text(text = "팀 선택", style = MaterialTheme.typography.h6, fontFamily = fontFamily)
             }
 
             items(teams) { team ->
@@ -85,20 +78,18 @@ fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateVi
                         onClick = { selectedTeam.value = team.id }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = team.name,fontFamily=fontFamily, fontSize = 16.sp)
+                    Text(text = team.name, fontFamily = fontFamily, fontSize = 16.sp)
                 }
             }
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "예약 날짜", style = MaterialTheme.typography.h6, fontFamily = fontFamily)
 
-                Text(text = "예약 날짜", style = MaterialTheme.typography.h6,fontFamily=fontFamily)
-
-                MeetingReservationDatePicker(
+                DatePicker(
                     selectedDate = meetingDate.value,
-                    onDateChange = { meetingDate.value = it },
-
-                    )
+                    onDateChange = { meetingDate.value = it }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -107,17 +98,15 @@ fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateVi
                         viewModel.createMeeting(selectedTeam.value, meetingDate.value)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
-
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6))
                 ) {
-                    Text(text = "미팅 생성",fontFamily=fontFamily)
+                    Text(text = "미팅 생성", fontFamily = fontFamily)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
 
-        // TopAppBar를 상단에 고정
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -126,8 +115,6 @@ fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateVi
             MeetingCreateTopBar(navController = navController)
         }
 
-
-        // BottomNavigationBar를 하단에 고정
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -138,42 +125,21 @@ fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateVi
     }
 }
 
-
 @Composable
 fun MeetingCreateTopBar(navController: NavController, modifier: Modifier = Modifier) {
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
 
     TopAppBar(
-        title = { Text("미팅 생성",fontFamily = fontFamily) },
+        title = { Text("미팅 생성", fontFamily = fontFamily) },
         navigationIcon = {
             IconButton(onClick = { navController.navigate("home_meeting") }) {
                 Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },
-        modifier = modifier
-            .fillMaxWidth()
-        ,
-        backgroundColor = Color(0xFF7DD8C6), // 여기에서 색상을 지정합니다.
-
+        modifier = modifier.fillMaxWidth(),
+        backgroundColor = Color(0xFF7DD8C6),
         actions = {},
         elevation = 8.dp
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun MeetingReservationDatePicker(selectedDate: LocalDate, onDateChange: (LocalDate) -> Unit) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    val datePickerDialog = DatePickerDialog(context, { _, selectedYear, selectedMonth, selectedDay ->
-        onDateChange(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
-    }, year, month, day)
-
-    Button(onClick = { datePickerDialog.show() }) {
-        Text(text = selectedDate.toString())
-    }
-}
