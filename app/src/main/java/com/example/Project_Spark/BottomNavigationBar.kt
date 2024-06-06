@@ -1,6 +1,7 @@
 package com.example.Project_Spark.ui.components
 
 import android.content.Intent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -15,6 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.Project_Spark.FriendsActivity
 import com.example.Project_Spark.R
+import com.example.Project_Spark.ChatListActivity
+import com.example.Project_Spark.HomeActivity_meeting
 
 @Composable
 fun BottomNavigationBar() {
@@ -24,7 +27,9 @@ fun BottomNavigationBar() {
         modifier = Modifier.fillMaxWidth(),
         containerColor = Color.White
     ) {
-        IconButton(onClick = { /* Do something */ }) {
+        IconButton(onClick = {
+            val intent = Intent(context, HomeActivity_meeting::class.java)
+            context.startActivity(intent) }) {
             Icon(
                 painter = painterResource(id = R.drawable.home), // 홈 아이콘 리소스
                 contentDescription = null,
@@ -32,9 +37,12 @@ fun BottomNavigationBar() {
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { /* Do something */ }) {
+        IconButton(onClick = {
+            // chattingActivity로 이동
+            val intent = Intent(context, ChatListActivity::class.java)
+            context.startActivity(intent) }) {
             Icon(
-                painter = painterResource(id = R.drawable.search), // 검색 아이콘 리소스
+                painter = painterResource(id = R.drawable.send), // dm 아이콘 리소스
                 contentDescription = null,
                 modifier = Modifier.size(30.dp) // Icon 크기 설정
             )
@@ -44,7 +52,7 @@ fun BottomNavigationBar() {
             Icon(
                 painter = painterResource(id = R.drawable.create), // 추가 아이콘 리소스
                 contentDescription = null,
-                modifier = Modifier.size(50.dp) // Icon 크기 설정
+                modifier = Modifier.size(30.dp) // Icon 크기 설정
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -54,18 +62,30 @@ fun BottomNavigationBar() {
             context.startActivity(intent)
         }) {
             Icon(
-                painter = painterResource(id = R.drawable.chat), // 채팅 아이콘 리소스
+                painter = painterResource(id = R.drawable.friend), // 친구목록 아이콘 리소스
                 contentDescription = null,
-                modifier = Modifier.size(40.dp) // Icon 크기 설정
+                modifier = Modifier.size(30.dp) // Icon 크기 설정
             )
         }
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { /* Do something */ }) {
             Icon(
-                painter = painterResource(id = R.drawable.defaultprofile), // 프로필 아이콘 리소스
+                painter = painterResource(id = R.drawable.user_circle), // 프로필 아이콘 리소스
                 contentDescription = null,
-                modifier = Modifier.size(40.dp) // Icon 크기 설정
+                modifier = Modifier.size(30.dp) // Icon 크기 설정
             )
         }
     }
+}
+
+
+@Composable
+fun xmlImage(drawableResId: Int, modifier: Modifier = Modifier) {
+    val painter = painterResource(id = drawableResId)
+
+    Image(
+        painter = painter,
+        contentDescription = null,
+        modifier = modifier.size(100.dp)
+    )
 }

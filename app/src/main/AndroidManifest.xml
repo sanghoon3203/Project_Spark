@@ -3,8 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.Project_Spark"> <!-- 패키지 이름 추가 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
     <application
+        android:name=".BaseApplication"
+        android:enableOnBackInvokedCallback="true"
+        android:hardwareAccelerated="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,6 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjectSpark"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,6 +29,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".HomeActivity_friendsmatching"></activity>
+        <activity android:name=".MeetingReservationActivity"></activity>
+        <activity android:name=".TeamCreationActivity"></activity>
+        <activity android:name=".TeamDeleteActivity"></activity>
+
+        <activity android:name=".CreateChannelActivity"></activity>
+        <activity android:name=".ChatListActivity"></activity>
+        <activity android:name="com.sendbird.uikit.activities.ChannelListActivity" />
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".HomeActivity_meeting"></activity>
         <activity android:name=".FriendsActivity"></activity>
