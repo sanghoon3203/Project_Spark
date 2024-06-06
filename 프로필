@@ -1,0 +1,104 @@
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.profileapp.ui.theme.ProfileAppTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            ProfileAppTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+                    ProfileScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileScreen() {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("프로필") },
+                backgroundColor = MaterialTheme.colors.primary
+            )
+        },
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.profile_image),
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ProfileInfoRow(label = "이름", value = "장원영")
+                ProfileInfoRow(label = "성향", value = "내향적")
+                ProfileInfoRow(label = "취미", value = "스포츠")
+                ProfileInfoRow(label = "학과", value = "경영학과")
+                ProfileInfoRow(label = "학번", value = "24학번")
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "휴학했다가 복학해서 친구들 많이 만들고 싶어요!")
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(painter = painterResource(id = R.drawable.ic_chat), contentDescription = "Chat")
+                    }
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(painter = painterResource(id = R.drawable.ic_block), contentDescription = "Block")
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun ProfileInfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
+        Text(text = value, style = MaterialTheme.typography.body1)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    ProfileAppTheme {
+        ProfileScreen()
+    }
+}
