@@ -152,6 +152,8 @@ fun DateAndSchedule() {
 
 @Composable
 fun ActionButtons() {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,7 +173,10 @@ fun ActionButtons() {
             )
         }
         Button(
-            onClick = { /* Do something */ },
+            onClick = {
+                val intent = Intent(context, HomeActivity_friendsmatching::class.java)
+                context.startActivity(intent)
+                },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()

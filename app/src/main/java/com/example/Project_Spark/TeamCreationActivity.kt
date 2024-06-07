@@ -176,7 +176,7 @@ fun TeamCreateTopBar(navController: NavController) {
     TopAppBar(
         title = { Text("팀 생성", fontFamily = fontFamily) },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("home_meeting") }) {
+            IconButton(onClick = { navController.navigate("HomeActivity_meeting") }) {
                 Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },

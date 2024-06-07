@@ -183,7 +183,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         // 친구 이름 표시
         Text(
             friend.name,
-            fontSize = 20.sp,
+            fontSize =18.sp,
             lineHeight = 21.sp,
             fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
             fontWeight = FontWeight.Normal,
@@ -192,12 +192,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         // 채팅 아이콘
-        Image(
-            painter = painterResource(id = R.drawable.chat),
-            contentDescription = "Chat",
-            contentScale = ContentScale.None,
-            modifier = Modifier.size(50.dp)
-        )
+
         Spacer(modifier = Modifier.width(8.dp))
         // 차단 아이콘
         Image(
@@ -210,7 +205,7 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
         // 삭제 버튼
         Button(onClick = onDelete,                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
         ) {
-            Text("Delete")
+            Text("친구삭제")
         }
     }
 }
@@ -231,7 +226,7 @@ fun TopBar(navController: NavController) {
     TopAppBar(
         title = { Text("친구목록", fontFamily = fontFamily) },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("home_meeting") }) {
+            IconButton(onClick = { navController.navigate("HomeActivity_meeting") }) {
                 Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },

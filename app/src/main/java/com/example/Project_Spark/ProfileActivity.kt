@@ -196,7 +196,7 @@ fun ProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
 
         // 프로필 저장 버튼
         Button(onClick = { uploadImageAndSaveProfile() }) {
-            Text("Save Profile")
+            Text("프로필 완성!")
         }
     }
 }

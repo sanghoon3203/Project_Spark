@@ -105,7 +105,7 @@ fun HomeScreen() {
 
             },
             onMeetingClick = { // 친구 탭 클릭 시 수행할 작업
-                // HomeActivity_friendsmathcing로 이동
+                //HomeActivity_meeting로 이동
                 val intent = Intent(context, HomeActivity_meeting::class.java)
                 context.startActivity(intent)
             },
@@ -168,7 +168,7 @@ fun FriendCard(profile: UserProfile) {
             .padding(8.dp)
             .size(170.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFF5D4037)) // 배경 색상을 변경합니다.
+            .background(Color(0xFFFFE0B2)) // 배경 색상을 변경합니다.
             .clickable { expanded = !expanded }
             .shadow(10.dp, RoundedCornerShape(20.dp))
     ) {
@@ -257,22 +257,7 @@ fun TopBar(
 
         )
         Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            painter = painterResource(id = R.drawable.filter), // 아이콘 리소스
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp) // 아이콘 크기를 지정합니다.
-                .clickable(onClick = onFilterClick)
 
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.bell), // 아이콘 리소스
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp) // 아이콘 크기를 지정합니다.
-                .clickable(onClick = onBellClick) // 클릭 이벤트 추가
-
-        )
     }
 }
 

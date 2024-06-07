@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.google.firebase.auth.FirebaseAuth
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
@@ -107,6 +108,7 @@ class ChatListActivity : AppCompatActivity() {
             // 연결 성공 후 채팅 화면 설정
             setContent {
                 ChatListScreen()
+                BottomNavigationBar()
             }
         }
     }
@@ -157,6 +159,7 @@ fun ChatListScreen() {
             }
         }
     }
+
 }
 
 @Composable
@@ -166,6 +169,7 @@ fun ChannelItem(channel: GroupChannel, onClick: () -> Unit) {
             .padding(8.dp)
             .fillMaxWidth()
             .clickable { onClick() },
+        
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
