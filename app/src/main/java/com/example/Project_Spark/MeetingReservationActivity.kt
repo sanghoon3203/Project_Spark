@@ -1,160 +1,180 @@
 package com.example.Project_Spark
 
+import android.app.DatePickerDialog
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
-import com.google.firebase.firestore.FirebaseFirestore
-import java.util.*
+import com.example.meetingapp.MeetingCreateViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalDate
+import java.util.Calendar
 
-class MeetingListActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MeetingReservationActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ProjectSparkTheme {
-                MeetingListScreen()
+                val navController = rememberNavController()
+                MeetingCreateScreen(navController)
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MeetingListScreen() {
-    val meetings = listOf(
-        "Meeting 1",
-        "Meeting 2",
-        "Meeting 3"
-    )
+fun MeetingCreateScreen(navController: NavController, viewModel: MeetingCreateViewModel = hiltViewModel()) {
+    val selectedTeam = remember { mutableStateOf<String?>(null) }
+    val meetingDate = remember { mutableStateOf(LocalDate.now()) }
+    val teams = viewModel.teams.collectAsState().value
+    val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
 
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedMeeting by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(Color.White)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
+        // LazyColumn을 중앙에 배치하여 내용이 스크롤 가능하게 함
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 56.dp, bottom = 56.dp) // TopAppBar와 BottomNavigationBar 높이만큼 패딩
         ) {
-            Text(
-                text = "Meeting List",
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn {
-                items(meetings) { meeting ->
-                    MeetingItem(meeting) {
-                        Log.d("MeetingListScreen", "매칭 버튼 클릭: $meeting")
-                        selectedMeeting = meeting
-                        showDialog = true
-                    }
+                Text(text = "팀 선택", style = MaterialTheme.typography.h6,fontFamily=fontFamily)
+            }
+
+            items(teams) { team ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = selectedTeam.value == team.id,
+                        onClick = { selectedTeam.value = team.id }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = team.name,fontFamily=fontFamily, fontSize = 16.sp)
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "예약 날짜", style = MaterialTheme.typography.h6,fontFamily=fontFamily)
+
+                DatePicker(
+                    selectedDate = meetingDate.value,
+                    onDateChange = { meetingDate.value = it },
+
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.createMeeting(selectedTeam.value, meetingDate.value)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
+
+                ) {
+                    Text(text = "미팅 생성",fontFamily=fontFamily)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
 
-        if (showDialog) {
-            ConfirmMatchDialog(
-                onDismiss = {
-                    Log.d("MeetingListScreen", "매칭 취소")
-                    showDialog = true
-                },
-                onConfirm = {
-                    selectedMeeting?.let {
-                        Log.d("MeetingListScreen", "매칭 확정: $it")
-                        saveMatchToFirestore(it, context)
-                    }
-                    showDialog = true
-                }
-            )
-        }
-
-        Button(
-            onClick = { showDialog = true },
-            modifier = Modifier.align(Alignment.BottomCenter)
+        // TopAppBar를 상단에 고정
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
         ) {
-            Text("미팅 생성")
+            MeetingCreateTopBar(navController = navController)
+        }
+
+
+        // BottomNavigationBar를 하단에 고정
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
+            BottomNavigationBar()
         }
     }
 }
 
-@Composable
-fun MeetingItem(meeting: String, onMatchClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .background(Color.LightGray, RoundedCornerShape(8.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(meeting, modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { onMatchClick() }) {
-            Text("매칭")
-        }
-    }
-}
 
 @Composable
-fun ConfirmMatchDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        title = { Text(text = "매칭 확인") },
-        text = { Text("매칭하시겠습니까?") },
-        confirmButton = {
-            Button(onClick = { onConfirm() }) {
-                Text("확정")
+fun MeetingCreateTopBar(navController: NavController, modifier: Modifier = Modifier) {
+    val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
+
+    TopAppBar(
+        title = { Text("미팅 생성",fontFamily = fontFamily) },
+        navigationIcon = {
+            IconButton(onClick = { navController.navigate("HomeActivity_meeting") }) {
+                Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },
-        dismissButton = {
-            Button(onClick = { onDismiss() }) {
-                Text("취소")
-            }
-        }
+        modifier = modifier
+            .fillMaxWidth()
+            ,
+        backgroundColor = Color(0xFF7DD8C6), // 여기에서 색상을 지정합니다.
+
+        actions = {},
+        elevation = 8.dp
     )
 }
 
-fun saveMatchToFirestore(meetingName: String, context: android.content.Context) {
-    val db = FirebaseFirestore.getInstance()
-    val matchNumber = UUID.randomUUID().toString()
-    val data = hashMapOf(
-        "meetingName" to meetingName,
-        "timestamp" to System.currentTimeMillis()
-    )
-    db.collection("meeting_fixing")
-        .document(matchNumber)
-        .set(data)
-        .addOnSuccessListener {
-            Log.d("MeetingListScreen", "매칭 성공: $matchNumber")
-            Toast.makeText(context, "매칭이 성공적으로 저장되었습니다", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener { e ->
-            Log.e("MeetingListScreen", "매칭 실패", e)
-            Toast.makeText(context, "매칭 저장에 실패했습니다", Toast.LENGTH_SHORT).show()
-        }
-}
-
-@Preview(showBackground = true)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MeetingListScreenPreview() {
-    ProjectSparkTheme {
-        MeetingListScreen()
+fun DatePicker(selectedDate: LocalDate, onDateChange: (LocalDate) -> Unit) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(context, { _, selectedYear, selectedMonth, selectedDay ->
+        onDateChange(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
+    }, year, month, day)
+
+    Button(onClick = { datePickerDialog.show() }) {
+        Text(text = selectedDate.toString())
     }
 }
+

@@ -1,0 +1,298 @@
+package com.example.Project_Spark
+
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.Project_Spark.ui.theme.ProjectSparkTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+
+const val TAG_PROFILE_ACTIVITY = "EditProfileActivity"
+
+class EditProfileActivity : ComponentActivity() {
+    private lateinit var storageRef: StorageReference
+    private lateinit var user: FirebaseUser
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        user = FirebaseAuth.getInstance().currentUser!!
+        storageRef = FirebaseStorage.getInstance().reference.child("UserProfile")
+
+        setContent {
+            ProjectSparkTheme {
+                EditProfileScreen(user, storageRef)
+            }
+        }
+    }
+}
+
+@Composable
+fun EditProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var name by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
+    var isIntrovert by remember { mutableStateOf(true) }
+    var major by remember { mutableStateOf("") }
+    var studentId by remember { mutableStateOf("") }
+    var imageUrl by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    // Load existing profile data
+    LaunchedEffect(user) {
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("profiles").document(user.uid)
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    val profile = document.toObject<Profile>()
+                    if (profile != null) {
+                        name = profile.name
+                        bio = profile.bio
+                        isIntrovert = profile.isIntrovert
+                        major = profile.major
+                        studentId = profile.studentId
+                        imageUrl = profile.imageUrl
+                    }
+                }
+                loading = false
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG_PROFILE_ACTIVITY, "프로필 로딩 실패", e)
+                error = "프로필 로딩에 실패했습니다."
+                loading = false
+            }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    fun uploadImageAndSaveProfile() {
+        if (imageUri != null) {
+            val ref = storageRef.child("${user.uid}")
+            ref.putFile(imageUri!!)
+                .addOnSuccessListener {
+                    ref.downloadUrl.addOnSuccessListener { uri ->
+                        saveProfileActivity(user, name, bio, isIntrovert, major, studentId, uri.toString(), context)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG_PROFILE_ACTIVITY, "이미지 업로드 실패", e)
+                }
+        } else {
+            saveProfileActivity(user, name, bio, isIntrovert, major, studentId, imageUrl, context)
+        }
+    }
+
+    if (loading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if (error != null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = error!!)
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else if (imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_profile_placeholder),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+                Text("프로필사진 선택")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("이름") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = bio,
+                onValueChange = { bio = it },
+                label = { Text("자기소개") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("성격: ")
+                RadioButton(
+                    selected = isIntrovert,
+                    onClick = { isIntrovert = true }
+                )
+                Text("내향형")
+                Spacer(modifier = Modifier.width(8.dp))
+                RadioButton(
+                    selected = !isIntrovert,
+                    onClick = { isIntrovert = false }
+                )
+                Text("외향형")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = major,
+                onValueChange = { major = it },
+                label = { Text("학과") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = studentId,
+                onValueChange = { studentId = it },
+                label = { Text("학번") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { uploadImageAndSaveProfile() }) {
+                Text("프로필 저장")
+            }
+        }
+    }
+}
+
+data class Profile(
+    val name: String = "",
+    val bio: String = "",
+    val isIntrovert: Boolean = true,
+    val major: String = "",
+    val studentId: String = "",
+    val email: String = "",
+    val imageUrl: String = ""
+)
+
+@Preview(showBackground = true)
+@Composable
+fun EditProfileScreenPreview() {
+    ProjectSparkTheme {
+        val dummyUser = FirebaseAuth.getInstance().currentUser!!
+        val dummyStorageRef = FirebaseStorage.getInstance().reference.child("UserProfile")
+        EditProfileScreen(dummyUser, dummyStorageRef)
+    }
+}
+
+fun saveProfileActivity(
+    user: FirebaseUser,
+    name: String,
+    bio: String,
+    isIntrovert: Boolean,
+    major: String,
+    studentId: String,
+    imageUrl: String,
+    context: Context
+) {
+    val profile = hashMapOf(
+        "name" to name,
+        "bio" to bio,
+        "isIntrovert" to isIntrovert,
+        "major" to major,
+        "studentId" to studentId,
+        "email" to user.email,
+        "imageUrl" to imageUrl
+    )
+    val db = FirebaseFirestore.getInstance()
+    db.collection("profiles").document(user.uid)
+        .set(profile)
+        .addOnSuccessListener {
+            Toast.makeText(context, "Profile Saved", Toast.LENGTH_SHORT).show()
+            val intent = Intent(context, HomeActivity_meeting::class.java)
+            context.startActivity(intent)
+            if (context is Activity) {
+                context.finish()
+            }
+        }
+        .addOnFailureListener { e ->
+            Log.e(TAG, "Profile Save Failed", e)
+            Toast.makeText(context, "Failed to Save Profile", Toast.LENGTH_SHORT).show()
+        }
+}

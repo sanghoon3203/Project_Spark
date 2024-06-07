@@ -79,6 +79,20 @@ fun MainScreen() {
                 fontSize =24.sp ),
                 fontFamily=fontFamily)// 텍스트 크기를 24sp로 설정)
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                val intent = Intent(context, RegisterActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Text("회원가입",fontFamily=fontFamily,style = androidx.compose.ui.text.TextStyle(
+                fontSize =24.sp ),)
+
+        }
     }
 }
 

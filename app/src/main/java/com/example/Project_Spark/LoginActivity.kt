@@ -91,15 +91,7 @@ fun LoginScreen(auth: FirebaseAuth, db: FirebaseFirestore) {
             Text("로그인",fontFamily=fontFamily)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = {
-                val intent = Intent(context, RegisterActivity::class.java)
-                context.startActivity(intent)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("회원가입",fontFamily=fontFamily)
-        }
+
     }
 }
 
