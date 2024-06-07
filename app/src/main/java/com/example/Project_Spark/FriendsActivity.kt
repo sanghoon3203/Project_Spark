@@ -1,11 +1,13 @@
 package com.example.Project_Spark
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -77,6 +79,8 @@ fun FriendsScreen(userId: String, viewModel: FriendsViewModel = viewModel()) {
         AddFriendButton(userId, viewModel)
         // 친구 목록
         FriendList(friendsList, userId, viewModel, Modifier.weight(1f))
+        // 블랙리스트 버튼 추가
+        BlacklistButton()
         // 바텀 네비게이션 바
         BottomNavigationBar()
     }
@@ -111,9 +115,9 @@ fun FriendList(friendsList: List<Friend>, userId: String, viewModel: FriendsView
         }
 
         // 친구 목록을 반복하여 각 친구 항목을 표시
-        items(friendsList) { friends ->
-            FriendItem(friend = friends, onDelete = {
-                viewModel.deleteFriend(userId, friends.id)
+        items(friendsList) { friend ->
+            FriendItem(friend = friend, userId = userId, onDelete = {
+                viewModel.deleteFriend(userId, friend.id)
             })
             Divider(
                 color = Color.LightGray,
@@ -145,7 +149,7 @@ fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
-            viewModel.addFriendByEmail(userId, newFriendEmail,) { success ->
+            viewModel.addFriendByEmail(userId, newFriendEmail) { success ->
                 if (success) {
                     Toast.makeText(context, "친구 요청을 보냈습니다.", Toast.LENGTH_SHORT).show()
                 } else {
@@ -159,12 +163,10 @@ fun AddFriendButton(userId: String, viewModel: FriendsViewModel) {
     }
 }
 
-
-
-
-
 @Composable
-fun FriendItem(friend: Friend, onDelete: () -> Unit) {
+fun FriendItem(friend: Friend, userId: String, onDelete: () -> Unit) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -204,7 +206,14 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
             painter = painterResource(id = R.drawable.close_ring),
             contentDescription = "Block",
             contentScale = ContentScale.None,
-            modifier = Modifier.size(50.dp)
+            modifier = Modifier
+                .size(50.dp)
+                .clickable {
+                    val intent = Intent(context, BlockActivity::class.java).apply {
+                        putExtra("userIdToBlock", friend.id)
+                    }
+                    context.startActivity(intent)
+                }
         )
         Spacer(modifier = Modifier.width(8.dp))
         // 삭제 버튼
@@ -215,7 +224,23 @@ fun FriendItem(friend: Friend, onDelete: () -> Unit) {
     }
 }
 
+@Composable
+fun BlacklistButton() {
+    val context = LocalContext.current
 
+    Button(
+        onClick = {
+            val intent = Intent(context, BlockedUsersActivity::class.java)
+            context.startActivity(intent)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 버튼 색상 지정
+    ) {
+        Text("블랙리스트 보기", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+    }
+}
 
 // FriendsScreen 미리보기용 프리뷰 함수
 @Preview(showBackground = true)
@@ -225,6 +250,7 @@ fun FriendsScreenPreview() {
         FriendsScreen("Fh6dHI8xCQZXdKqw9G4WRjSADeX2")
     }
 }
+
 @Composable
 fun TopBar(navController: NavController) {
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
