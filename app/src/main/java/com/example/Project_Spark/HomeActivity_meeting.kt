@@ -160,7 +160,8 @@ fun ActionButtons() {
             .padding(16.dp)
     ) {
         Button(
-            onClick = { /* Do something */ },
+            onClick = {   val intent = Intent(context, MeetingWaitingRoomActivity::class.java)
+                context.startActivity(intent) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()

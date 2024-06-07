@@ -33,6 +33,7 @@
         <activity android:name=".MeetingReservationActivity"></activity>
         <activity android:name=".TeamCreationActivity"></activity>
         <activity android:name=".TeamDeleteActivity"></activity>
+        <activity android:name=".MeetingWaitingRoomActivity"></activity>
 
         <activity android:name=".CreateChannelActivity"></activity>
         <activity android:name=".ChatListActivity"></activity>

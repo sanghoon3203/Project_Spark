@@ -3,18 +3,11 @@ package com.example.Project_Spark
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,13 +34,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import kotlin.random.Random
-import com.example.Project_Spark.ui.components.BottomNavigationBar
-
 
 class HomeActivity_friendsmatching : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -72,9 +64,7 @@ data class UserProfile(
 // HomeScreen 구성
 @Composable
 fun HomeScreen() {
-    // LocalContext를 사용하여 현재 context를 가져옵니다.
     val context = LocalContext.current
-
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
     val currentUser = auth.currentUser
@@ -100,29 +90,23 @@ fun HomeScreen() {
     }
 
     Scaffold(
-        topBar = { TopBar(
-            onFriendClick = {
-
-            },
-            onMeetingClick = { // 친구 탭 클릭 시 수행할 작업
-                //HomeActivity_meeting로 이동
-                val intent = Intent(context, HomeActivity_meeting::class.java)
-                context.startActivity(intent)
-            },
-            onBellClick = {
-                // HomeActivity_friendsmathcing로 이동
-                val intent = Intent(context, HomeActivity_meeting::class.java)
-                context.startActivity(intent)
-
-            },
-            onFilterClick = {
-                // HomeActivity_friendsmathcing로 이동
-                val intent = Intent(context, HomeActivity_meeting::class.java)
-                context.startActivity(intent)
-
-            })
-
-             },
+        topBar = {
+            TopBar(
+                onFriendClick = {},
+                onMeetingClick = {
+                    val intent = Intent(context, HomeActivity_meeting::class.java)
+                    context.startActivity(intent)
+                },
+                onBellClick = {
+                    val intent = Intent(context, HomeActivity_meeting::class.java)
+                    context.startActivity(intent)
+                },
+                onFilterClick = {
+                    val intent = Intent(context, HomeActivity_meeting::class.java)
+                    context.startActivity(intent)
+                }
+            )
+        },
         bottomBar = { BottomNavigationBar() },
         content = { paddingValues ->
             Column(
@@ -135,9 +119,6 @@ fun HomeScreen() {
             }
         }
     )
-
-
-
 }
 
 @Composable
@@ -158,17 +139,20 @@ fun FriendsRecommendList(friendsRecommendList: List<UserProfile>) {
         }
     }
 }
-
 @Composable
 fun FriendCard(profile: UserProfile) {
     var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
 
     Box(
         modifier = Modifier
             .padding(8.dp)
             .size(170.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFFFFE0B2)) // 배경 색상을 변경합니다.
+            .background(Color(0xFFFFE0B2))
             .clickable { expanded = !expanded }
             .shadow(10.dp, RoundedCornerShape(20.dp))
     ) {
@@ -208,29 +192,111 @@ fun FriendCard(profile: UserProfile) {
                     .background(Color.Black.copy(alpha = 0.5f))
                     .clickable { expanded = false }
             ) {
-                Image(
-                    painter = rememberImagePainter(profile.imageUrl),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(300.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Image(
+                        painter = rememberImagePainter(profile.imageUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(300.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            showDialog = true
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF03DAC5))
+                    ) {
+                        Text(text = "+", fontSize = 24.sp)
+                    }
+                }
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("친구를 추가하겠습니까?", fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
+            confirmButton = {
+                TextButton(onClick = {
+                    // Firebase Firestore에서 친구 추가
+                    val currentUserUid = auth.currentUser?.uid
+                    if (currentUserUid != null) {
+                        val userDocument = firestore.collection("users").document(currentUserUid)
+                        userDocument.update("friends", FieldValue.arrayUnion(profile.uid))
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "친구가 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                                showDialog = false
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "친구 추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                showDialog = false
+                            }
+                    }
+                }) {
+                    Text("생성", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("취소", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            }
+        )
     }
 }
 
 
+@Composable
+fun showAddFriendDialog(context: android.content.Context, auth: FirebaseAuth, firestore: FirebaseFirestore, friendUid: String) {
+    val showDialog = remember { mutableStateOf(true) }
 
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("친구를 추가하겠습니까?", fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
+            confirmButton = {
+                TextButton(onClick = {
+                    // Firebase Firestore에서 친구 추가
+                    val currentUserUid = auth.currentUser?.uid
+                    if (currentUserUid != null) {
+                        val userDocument = firestore.collection("users").document(currentUserUid)
+                        userDocument.update("friends", FieldValue.arrayUnion(friendUid))
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "친구가 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                                showDialog.value = false
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "친구 추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                showDialog.value = false
+                            }
+                    }
+                }) {
+                    Text("생성", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog.value = false }) {
+                    Text("취소", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            }
+        )
+    }
+}
 
 @Composable
 fun TopBar(
     onFriendClick: () -> Unit,
     onMeetingClick: () -> Unit,
     onBellClick: () -> Unit,
-    onFilterClick:()-> Unit
+    onFilterClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -243,8 +309,7 @@ fun TopBar(
             fontSize = 18.sp,
             fontWeight = FontWeight.ExtraLight,
             fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
-            color = Color.Black ,
-
+            color = Color.Black
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
@@ -254,10 +319,8 @@ fun TopBar(
             fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
             color = Color.Gray,
             modifier = Modifier.clickable(onClick = onMeetingClick)
-
         )
         Spacer(modifier = Modifier.weight(1f))
-
     }
 }
 
@@ -270,18 +333,14 @@ fun FriendsBanner() {
         horizontalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.friendbanner), // 이미지 리소스
+            painter = painterResource(id = R.drawable.friendbanner),
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth(), // 이미지를 가로 전체로 채우기
-            contentScale = ContentScale.FillWidth // 가로 비율을 맞추기 위해 이미지 스케일 조정
-
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.FillWidth
         )
     }
 }
 
-
-
-// 프리뷰
 @Preview(showBackground = true)
 @Composable
 fun PreviewHomeScreen() {

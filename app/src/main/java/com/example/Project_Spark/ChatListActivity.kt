@@ -7,12 +7,11 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +19,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.Project_Spark.ui.components.BottomNavigationBar
 import com.google.firebase.auth.FirebaseAuth
@@ -108,11 +109,12 @@ class ChatListActivity : AppCompatActivity() {
             // 연결 성공 후 채팅 화면 설정
             setContent {
                 ChatListScreen()
-                BottomNavigationBar()
             }
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen() {
     val context = LocalContext.current as AppCompatActivity
@@ -131,12 +133,26 @@ fun ChatListScreen() {
             }
             groupChannels?.let {
                 channels.addAll(it)
-
             }
         }
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("나의 채팅", fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable {
+                            val intent = Intent(context, HomeActivity_meeting::class.java)
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 val intent = Intent(context, CreateChannelActivity::class.java)
@@ -144,22 +160,25 @@ fun ChatListScreen() {
             }) {
                 Text("+")
             }
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            items(channels) { channel ->
-                ChannelItem(channel = channel, onClick = {
-                    val intent = ChannelActivity.newIntent(context, channel.url)
-                    context.startActivity(intent)
-                })
+        },
+        bottomBar = {
+            BottomNavigationBar()
+        },
+        content = { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                items(channels) { channel ->
+                    ChannelItem(channel = channel, onClick = {
+                        val intent = ChannelActivity.newIntent(context, channel.url)
+                        context.startActivity(intent)
+                    })
+                }
             }
         }
-    }
-
+    )
 }
 
 @Composable
@@ -169,12 +188,11 @@ fun ChannelItem(channel: GroupChannel, onClick: () -> Unit) {
             .padding(8.dp)
             .fillMaxWidth()
             .clickable { onClick() },
-        
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = channel.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = "Members: ${channel.memberCount}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = channel.name, style = MaterialTheme.typography.bodyLarge, fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+            Text(text = "Members: ${channel.members.joinToString(", ") { it.nickname ?: it.userId }}", style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
         }
     }
 }
