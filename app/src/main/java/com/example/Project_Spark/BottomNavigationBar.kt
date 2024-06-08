@@ -18,6 +18,8 @@ import com.example.Project_Spark.FriendsActivity
 import com.example.Project_Spark.R
 import com.example.Project_Spark.ChatListActivity
 import com.example.Project_Spark.HomeActivity_meeting
+import com.example.Project_Spark.ProfileActivity
+import com.example.Project_Spark.ProfileEditActivity
 
 @Composable
 fun BottomNavigationBar() {
@@ -68,7 +70,8 @@ fun BottomNavigationBar() {
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { /* Do something */ }) {
+        IconButton(onClick = { val intent = Intent(context, ProfileEditActivity::class.java)
+            context.startActivity(intent)}) {
             Icon(
                 painter = painterResource(id = R.drawable.user_circle), // 프로필 아이콘 리소스
                 contentDescription = null,

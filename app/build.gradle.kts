@@ -69,6 +69,7 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.6.7")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("com.google.android.libraries.places:places:3.5.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.7")
     testImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")

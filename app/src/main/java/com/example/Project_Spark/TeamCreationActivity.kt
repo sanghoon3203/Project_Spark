@@ -1,5 +1,6 @@
 package com.example.Project_Spark
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -26,15 +27,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.Project_Spark.ui.theme.ProjectSparkTheme
 import com.example.Project_Spark.model.Friend
 import com.example.Project_Spark.ui.components.BottomNavigationBar
-import com.example.Project_Spark.viewmodel.TeamCreateViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -51,36 +52,65 @@ class TeamCreationActivity : ComponentActivity() {
 }
 
 @Composable
-fun TeamCreateScreen(navController: NavController, viewModel: TeamCreateViewModel = hiltViewModel()) {
+fun TeamCreateScreen(navController: NavController) {
     val teamName = remember { mutableStateOf("") }
     val department = remember { mutableStateOf("") }
     val teamDescription = remember { mutableStateOf("") }
-    val teamMembers = remember { mutableStateListOf<String>() }
+    val teamMembers = remember { mutableStateListOf<Friend>() }
     val showMemberDialog = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val friendsList by viewModel.friendsList.collectAsState()
 
-    // 현재 로그인된 사용자의 ID 가져오기
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-    // userId가 유효하지 않은 경우 처리
     if (userId.isEmpty()) {
         Toast.makeText(context, "Failed to get user ID", Toast.LENGTH_SHORT).show()
         return
     }
 
+    val friendsList = remember { mutableStateListOf<Friend>() }
     LaunchedEffect(userId) {
-        viewModel.fetchFriends()
+        fetchFriends { friends ->
+            friendsList.addAll(friends)
+        }
     }
 
     if (showMemberDialog.value) {
         MemberSelectionDialog(friendsList, onDismiss = { showMemberDialog.value = false }) { selectedMembers ->
-            selectedMembers.forEach { member ->
-                if (!teamMembers.contains(member)) {
+            selectedMembers.forEach { memberId ->
+                val member = friendsList.find { it.id == memberId }
+                if (member != null && !teamMembers.contains(member)) {
                     teamMembers.add(member)
                 }
             }
         }
+    }
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("팀을 생성하시겠습니까?", fontFamily = FontFamily(Font(R.font.applesdgothicneobold))) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val memberIds = teamMembers.map { it.id }
+                    createTeam(userId, teamName.value, department.value, teamDescription.value, memberIds) { success ->
+                        if (success) {
+                            Toast.makeText(context, "팀이 생성되었습니다.", Toast.LENGTH_SHORT).show()
+                            showDialog.value = false
+                        } else {
+                            Toast.makeText(context, "팀 생성 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }) {
+                    Text("생성", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog.value = false }) {
+                    Text("취소", fontFamily = FontFamily(Font(R.font.applesdgothicneobold)))
+                }
+            }
+        )
     }
 
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
@@ -98,29 +128,32 @@ fun TeamCreateScreen(navController: NavController, viewModel: TeamCreateViewMode
         ) {
             Spacer(modifier = Modifier.height(56.dp))
 
-            TextField(
+            CustomTextField(
                 value = teamName.value,
                 onValueChange = { teamName.value = it },
-                label = { Text("팀 이름", fontFamily = fontFamily) },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = LocalTextStyle.current.copy(fontFamily = fontFamily)
+                label = "팀 이름",
+                fontFamily = fontFamily
             )
 
-            TextField(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomTextField(
                 value = department.value,
                 onValueChange = { department.value = it },
-                label = { Text("학과", fontFamily = fontFamily) },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = LocalTextStyle.current.copy(fontFamily = fontFamily)
+                label = "학과",
+                fontFamily = fontFamily
             )
 
-            TextField(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomTextField(
                 value = teamDescription.value,
                 onValueChange = { teamDescription.value = it },
-                label = { Text("팀 소개", fontFamily = fontFamily) },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = LocalTextStyle.current.copy(fontFamily = fontFamily)
+                label = "팀 소개",
+                fontFamily = fontFamily
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -134,19 +167,17 @@ fun TeamCreateScreen(navController: NavController, viewModel: TeamCreateViewMode
             }
 
             teamMembers.forEach { member ->
-                Text(text = member, fontFamily = fontFamily)
+                Text(text = member.name, fontFamily = fontFamily)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    viewModel.createTeam(teamName.value, department.value, teamDescription.value, teamMembers)
+                    showDialog.value = true
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6)) // 여기에서 색상을 지정합니다.
-
-
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7DD8C6))
             ) {
                 Text(text = "팀 생성", fontFamily = fontFamily)
             }
@@ -171,18 +202,35 @@ fun TeamCreateScreen(navController: NavController, viewModel: TeamCreateViewMode
 }
 
 @Composable
+fun CustomTextField(value: String, onValueChange: (String) -> Unit, label: String, fontFamily: FontFamily) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label, fontFamily = fontFamily) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(8.dp),
+        textStyle = LocalTextStyle.current.copy(fontFamily = fontFamily)
+    )
+}
+
+@Composable
 fun TeamCreateTopBar(navController: NavController) {
+    val context = LocalContext.current
     val fontFamily = FontFamily(Font(R.font.applesdgothicneobold))
     TopAppBar(
         title = { Text("팀 생성", fontFamily = fontFamily) },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("HomeActivity_meeting") }) {
+            IconButton(onClick = {
+                val intent = Intent(context, HomeActivity_meeting::class.java)
+                context.startActivity(intent)
+            }) {
                 Icon(painterResource(id = R.drawable.expand_left), contentDescription = "Back")
             }
         },
         modifier = Modifier
-            .fillMaxWidth()
-            ,
+            .fillMaxWidth(),
         backgroundColor = Color(0xFF7DD8C6),
         actions = {},
         elevation = 8.dp
@@ -211,7 +259,7 @@ fun FriendItem(friend: Friend, isSelected: Boolean, onSelect: (Boolean) -> Unit)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            friend.name,
+            text = friend.name,
             fontSize = 20.sp,
             lineHeight = 21.sp,
             fontFamily = FontFamily(Font(R.font.applesdgothicneobold)),
@@ -241,6 +289,7 @@ fun MemberSelectionDialog(friends: List<Friend>, onDismiss: () -> Unit, onConfir
 
                 LazyColumn {
                     items(friends) { friend ->
+                        val isSelected = selectedMembers.contains(friend.id)
                         FriendItem(
                             friend = friend,
                             isSelected = selectedMembers.contains(friend.id),
@@ -271,4 +320,54 @@ fun MemberSelectionDialog(friends: List<Friend>, onDismiss: () -> Unit, onConfir
             }
         }
     }
+}
+
+fun fetchFriends(onComplete: (List<Friend>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    db.collection("users").document(userId).get()
+        .addOnSuccessListener { document ->
+            val friends = document["friends"] as? List<String> ?: listOf()
+            val friendsList = mutableListOf<Friend>()
+
+            friends.forEach { friendId ->
+                db.collection("profiles").document(friendId).get()
+                    .addOnSuccessListener { friendDocument ->
+                        val name = friendDocument.getString("name") ?: ""
+                        val imageUrl = friendDocument.getString("imageUrl")
+                        val friend = Friend(id = friendId, name = name, profileImageUrl = imageUrl)
+                        if (friend != null) {
+                            friendsList.add(friend)
+                        }
+                        if (friendsList.size == friends.size) {
+                            onComplete(friendsList)
+                        }
+                    }
+            }
+        }
+}
+
+fun createTeam(userId: String, teamName: String, department: String, teamDescription: String, teamMembers: List<String>, onComplete: (Boolean) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val team = hashMapOf(
+        "name" to teamName,
+        "department" to department,
+        "description" to teamDescription,
+        "members" to teamMembers
+    )
+
+    db.collection("teams").add(team)
+        .addOnSuccessListener { documentReference ->
+            db.collection("users").document(userId).update("myteams", FieldValue.arrayUnion(documentReference.id))
+                .addOnSuccessListener {
+                    onComplete(true)
+                }
+                .addOnFailureListener {
+                    onComplete(false)
+                }
+        }
+        .addOnFailureListener {
+            onComplete(false)
+        }
 }

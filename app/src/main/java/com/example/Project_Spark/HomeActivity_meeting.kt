@@ -75,7 +75,9 @@ fun Homescreen() {
         // 배너
         Banner()
         // 미팅 정보 카드
-        MeetingInfo()
+
+        Spacer(modifier = Modifier.weight(1f))
+        Confirmed_Meeting()
         Spacer(modifier = Modifier.weight(1f))
         MeetingMK()
         // 하단 네비게이션 바
@@ -160,7 +162,8 @@ fun ActionButtons() {
             .padding(16.dp)
     ) {
         Button(
-            onClick = { /* Do something */ },
+            onClick = {   val intent = Intent(context, MeetingWaitingRoomActivity::class.java)
+                context.startActivity(intent) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -242,9 +245,29 @@ fun Banner() {
         )
     }
 }
-
 @Composable
-fun MeetingInfo() {}
+fun Confirmed_Meeting(){
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp) // 전체 Row의 패딩을 추가합니다
+    ) {
+        xmlImage(
+            drawableResId = R.drawable.button__confirmed,
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp)
+                .clickable {
+                    val intent = Intent(context, ConfirmedMeetingsActivity::class.java)
+                    context.startActivity(intent)
+                }
+        )
+
+
+
+
+}}
 
 @Composable
 fun MeetingMK() {
@@ -255,7 +278,7 @@ fun MeetingMK() {
             .padding(16.dp) // 전체 Row의 패딩을 추가합니다
     ) {
         xmlImage(
-            drawableResId = R.drawable.meetingbutton,
+            drawableResId = R.drawable.button_meeting,
             modifier = Modifier
                 .weight(1f)
                 .padding(8.dp)
