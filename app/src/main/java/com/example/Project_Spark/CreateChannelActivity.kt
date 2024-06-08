@@ -27,13 +27,13 @@ import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.uikit.activities.ChannelActivity
-import com.sendbird.android.exception.SendbirdException
 import com.example.Project_Spark.model.Friend
 
 class CreateChannelActivity : ComponentActivity() {
 
     private lateinit var selectedUsers: MutableList<String>
     private lateinit var userId: String
+    private var blockedUsers: List<String> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,21 +47,26 @@ class CreateChannelActivity : ComponentActivity() {
         }
 
         selectedUsers = mutableListOf()
-        setContent {
-            CreateChannelScreen(userId, selectedUsers)
+
+        // 차단된 사용자 목록 불러오기
+        loadBlockedUsers(userId) { blockedList ->
+            blockedUsers = blockedList
+            setContent {
+                CreateChannelScreen(userId, selectedUsers, blockedUsers)
+            }
         }
     }
 }
 
 @Composable
-fun CreateChannelScreen(userId: String, selectedUsers: MutableList<String>) {
+fun CreateChannelScreen(userId: String, selectedUsers: MutableList<String>, blockedUsers: List<String>) {
     val context = LocalContext.current
     var friends by remember { mutableStateOf(listOf<Friend>()) }
 
     // 친구 목록 불러오기
     LaunchedEffect(userId) {
         loadFriends(userId) { friendList ->
-            friends = friendList
+            friends = friendList.filter { it.id !in blockedUsers }
         }
     }
 
@@ -92,7 +97,7 @@ fun CreateChannelScreen(userId: String, selectedUsers: MutableList<String>) {
         // 채팅방 생성 버튼
         Button(
             onClick = {
-                createChannel(selectedUsers, context)
+                createChannel(selectedUsers, context, blockedUsers)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,7 +146,25 @@ private fun loadFriends(userId: String, callback: (List<Friend>) -> Unit) {
         }
 }
 
-private fun createChannel(selectedUsers: List<String>, context: android.content.Context) {
+private fun loadBlockedUsers(userId: String, callback: (List<String>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val blockedUsersRef = db.collection("users").document(userId)
+
+    blockedUsersRef.get()
+        .addOnSuccessListener { document ->
+            if (document != null) {
+                val blockedIds = document.get("blocked_users") as? List<String> ?: emptyList()
+                callback(blockedIds)
+            } else {
+                callback(emptyList())
+            }
+        }
+        .addOnFailureListener { exception ->
+            callback(emptyList())
+        }
+}
+
+private fun createChannel(selectedUsers: List<String>, context: android.content.Context, blockedUsers: List<String>) {
     // 이미 연결된 상태이므로 현재 사용자 ID를 가져옵니다.
     val currentUser = SendbirdChat.currentUser
     if (currentUser == null) {
@@ -149,8 +172,15 @@ private fun createChannel(selectedUsers: List<String>, context: android.content.
         return
     }
 
+    // 채널 생성 전 차단된 사용자 확인
+    val usersToAdd = selectedUsers.filter { it !in blockedUsers }
+    if (usersToAdd.isEmpty()) {
+        Toast.makeText(context, "차단된 사용자는 채팅에 초대할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        return
+    }
+
     val params = GroupChannelCreateParams().apply {
-        userIds = selectedUsers + listOf(currentUser.userId)
+        userIds = usersToAdd + listOf(currentUser.userId)
         isDistinct = true
     }
 
