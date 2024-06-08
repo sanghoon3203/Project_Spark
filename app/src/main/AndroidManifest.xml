@@ -40,6 +40,8 @@
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".HomeActivity_meeting"></activity>
         <activity android:name=".FriendsActivity"></activity>
+        <activity android:name=".BlockedUsersActivity"></activity>
+        <activity android:name=".BlockActivity"></activity>
         <activity android:name=".LoginActivity" android:exported="true"/>
         <activity android:name=".ProfileActivity" android:exported="true"/>
     </application>
