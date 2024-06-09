@@ -3,6 +3,8 @@ package com.example.Project_Spark
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,6 +34,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
 
 const val TAG = "ProfileActivity"
 
@@ -76,8 +79,31 @@ fun ProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
 
     // 이미지 업로드 및 프로필 저장
     fun uploadImageAndSaveProfile() {
-        if (imageUri != null) {
-            val ref = storageRef.child("${user.uid}")
+        if (name.isEmpty() || bio.isEmpty() || major.isEmpty() || studentId.isEmpty()) {
+            Toast.makeText(context, "모든 필드를 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val ref = storageRef.child("${user.uid}")
+        if (imageUri == null) {
+            // 기본 프로필 이미지를 Firebase Storage에 업로드
+            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.defaultprofile)
+            val baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val data = baos.toByteArray()
+
+            val defaultImageRef = storageRef.child("defaultprofile.jpg")
+            defaultImageRef.putBytes(data)
+                .addOnSuccessListener {
+                    defaultImageRef.downloadUrl.addOnSuccessListener { uri ->
+                        saveProfile(user, name, bio, isIntrovert, major, studentId, uri.toString(), context)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Default Image Upload Failed", e)
+                    Toast.makeText(context, "기본 이미지 업로드 실패: " + e.message, Toast.LENGTH_SHORT).show()
+                }
+        } else {
             ref.putFile(imageUri!!)
                 .addOnSuccessListener {
                     ref.downloadUrl.addOnSuccessListener { uri ->
@@ -86,7 +112,7 @@ fun ProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Image Upload Failed", e)
-                    Toast.makeText(context, "Failed " + e.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "이미지 업로드 실패: " + e.message, Toast.LENGTH_SHORT).show()
                 }
         }
     }
@@ -111,7 +137,7 @@ fun ProfileScreen(user: FirebaseUser, storageRef: StorageReference) {
             )
         } else {
             Image(
-                painter = painterResource(id = R.drawable.ic_profile_placeholder),
+                painter = painterResource(id = R.drawable.defaultprofile),
                 contentDescription = null,
                 modifier = Modifier
                     .size(150.dp)

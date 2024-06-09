@@ -92,6 +92,7 @@ class RegisterActivity : ComponentActivity() {
     }
 
     // 사용자 등록 함수
+    // 사용자 등록 함수
     private fun registerUser(email: String, password: String) {
         // 이메일 형식 검증
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -114,6 +115,10 @@ class RegisterActivity : ComponentActivity() {
                                 saveUserProfile(user.uid, email)
                                 // 자동 로그인
                                 signIn(email, password)
+                                // ProfileActivity로 이동
+                                val intent = Intent(this, ProfileActivity::class.java)
+                                startActivity(intent)
+                                finish()
                             } else {
                                 Log.e(TAG, "sendEmailVerification:failure", verificationTask.exception)
                                 Toast.makeText(this, "인증 이메일 전송 실패.", Toast.LENGTH_SHORT).show()
@@ -125,6 +130,7 @@ class RegisterActivity : ComponentActivity() {
                 }
             }
     }
+
 
     // 사용자 프로필 저장 함수
     private fun saveUserProfile(uid: String, email: String) {
@@ -201,9 +207,7 @@ class RegisterActivity : ComponentActivity() {
                 }
 
                 Log.d(TAG, "SendbirdChat user info updated")
-                // HomeActivity로 이동
-                startActivity(Intent(this, HomeActivity_meeting::class.java))
-                finish()
+
             }
         }
     }
